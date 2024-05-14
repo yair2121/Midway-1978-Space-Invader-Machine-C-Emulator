@@ -1,10 +1,7 @@
 #pragma once
 #include <inttypes.h>
 #include <stdlib.h>
-
-typedef enum { // For readability- FALSE is 0 and TRUE is 1.
-	FALSE = 0, TRUE
-} bool;
+#include <stdbool.h>
 
 typedef struct ConditionCodes {
 	uint8_t    z : 1;
@@ -36,3 +33,8 @@ typedef struct State8080 {
 /// </summary>
 /// <param name="state"></param>
 int Emulate8080Op(State8080* state);
+
+
+State8080* initState();
+
+void freeState(State8080* state);
