@@ -8,7 +8,7 @@
 /// <param name="codebuffer">Valid pointer to 8080 assembly code</param>
 /// <param name="pc">Current offset into the code</param>
 /// <returns>Size of op in bytes</returns>
-int Disassemble8080Op(unsigned char* codebuffer, int pc)
+int disassemble_8080_op(unsigned char* codebuffer, int pc)
 {
 	unsigned char* code = &codebuffer[pc];
 	int opbytes = 1;
@@ -306,9 +306,9 @@ int Disassemble8080Op(unsigned char* codebuffer, int pc)
 }
 
 
-void DisassembleCode(size_t size, unsigned char* codebuffer) {
+void disassemble_code(size_t size, unsigned char* codebuffer) {
 
 	for (int pc = 0; pc < size;) {
-		pc += Disassemble8080Op(codebuffer, pc); // TODO: return the code instead of printing it.
+		pc += disassemble_8080_op(codebuffer, pc); // TODO: return the code instead of printing it.
 	}
 }

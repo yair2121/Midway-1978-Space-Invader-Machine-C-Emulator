@@ -1,6 +1,6 @@
 #include "Emulate8080.h"
 
-bool Parity(int value, int size) {
+static bool parity(int value, int size) {
 	value = (value & ((1 << size) - 1));
 	int activeBitCount = 0;
 	for (int i = 0; i < size; i++) {
@@ -16,7 +16,7 @@ bool Parity(int value, int size) {
 /// </summary>
 /// <param name="state"></param>
 /// <param name="flags"></param>
-void byteToFlags(State8080* state, uint8_t flags) {
+static void byte_to_flags(State8080* state, uint8_t flags) {
 	state->cc.cy = flags & 1;
 	state->cc.p = (flags >> 2) & 1;
 	state->cc.ac = (flags >> 4) & 1;
@@ -24,48 +24,61 @@ void byteToFlags(State8080* state, uint8_t flags) {
 	state->cc.s = (flags >> 7) & 1;
 }
 
-uint8_t flagsToByte(State8080* state) {
+static uint8_t flags_to_byte(State8080* state) {
 	uint8_t flags = state->cc.cy | state->cc.p << 2 | state->cc.ac << 4 | state->cc.z << 6 | state->cc.s << 7;
 	return flags;
 }
 
 int counter = 0;
 
-void printState(State8080* state) {
+static void print_state(State8080* state) {
 	printf("\tcounter=%d, C=%d,P=%d,S=%d,Z=%d\n", counter++, state->cc.cy, state->cc.p,
 		state->cc.s, state->cc.z);
 	printf("\tAF: $%02x%02x BC: $%02x%02x DE: $%02x%02x HL $%02x%02x PC %04x SP %04x\nInstruction %02x\n",
-		state->a, flagsToByte(state), state->b, state->c, state->d,
+		state->a, flags_to_byte(state), state->b, state->c, state->d,
 		state->e, state->h, state->l, state->pc, state->sp, state->memory[state->pc]);
 }
 
-void UnimplementedInstruction(State8080* state)
+static void unimplemented_instruction(State8080* state)
 {
 	printf("Error: Unimplemented instruction $%02x\n", state->memory[state->pc]); // TODO: add information from the state.
-	printState(state);
+	print_state(state);
 	exit(EXIT_FAILURE);
 }
 
-State8080* initState() {
+State8080* init_state() {
 	State8080* state = (State8080*)calloc(1, sizeof(State8080));
 
-	state->memory = (uint8_t*)calloc(20000, sizeof(uint8_t)); // TODO: check the correct size;
+	state->memory = (uint8_t*)calloc(200000, sizeof(uint8_t)); // TODO: check the correct size;
 	return state;
 }
 
-void freeState(State8080* state) {
+void free_state(State8080* state) {
 	//free(state->memory);
 	free(state);
 }
 
+static void push(State8080* state, uint8_t arg1, uint8_t arg2) {
+	state->memory[state->sp - 1] = arg1;
+	state->memory[state->sp - 2] = arg2;
+
+	state->sp -= 2;
+}
+
+static uint8_t pop_byte(State8080* state) {
+	uint8_t result = state->memory[state->sp];
+	state->sp++;
+	return result;
+}
 
 
-
-int Emulate8080Op(State8080* state)
+int emulate_8080_op(State8080* state)
 {
 	unsigned char* opcode = &state->memory[state->pc];
-	printState(state);
-
+	print_state(state);
+	if (counter == 1554) {
+		int b = 3;
+	}
 	state->pc += 1;
 
 
@@ -86,24 +99,24 @@ int Emulate8080Op(State8080* state)
 	case 0x01: {
 		state->b = opcode[2];
 		state->c = opcode[1];
-		state->pc += 1;
+		state->pc += 2;
 		break;
 	}
 	case 0x02: {
 		uint16_t bc = (state->b << 8) | state->c;
 		state->memory[bc] = state->a;
 		break;
-	}
+	} 
 	case 0x05: {
-		state->b = state->b - 1;
+		state->b--;
 		state->cc.z = state->b == 0;
 		state->cc.s = (state->b >> 7);
-		state->cc.p = Parity(state->b, 8);
+		state->cc.p = parity(state->b, 8);
 		break;
 	}
 	case 0x06: {
 		state->b = opcode[1];
-		state->pc += 1;
+		state->pc++;
 		break;
 	}
 	case 0x07: {
@@ -125,7 +138,18 @@ int Emulate8080Op(State8080* state)
 		state->a = state->memory[BC];
 		break;
 	}
-
+	case 0x0d: { // DCR C
+		state->c--;
+		state->cc.z = state->c == 0;
+		state->cc.s = state->c >> 7;
+		state->cc.p = parity(state->c, 8);
+		break;
+	}
+	case 0x0e: {
+		state->c = opcode[1];
+		state->pc++;
+		break;
+	}
 	case 0x0f: { // RRC
 		state->cc.cy = state->a & 1;
 		state->a = (state->a << 7) | state->a >> 1;
@@ -141,10 +165,18 @@ int Emulate8080Op(State8080* state)
 		uint16_t DE = (state->d << 8) | state->e;
 		DE++;
 		state->d = DE >> 8;
-		state->e = DE & 0x0f;
+		state->e = DE & 0xff;
 		break;
 	}
-
+	case 0x19: { // DAD H
+		uint32_t HL = (state->h << 8) | state->l;
+		uint32_t DE = (state->d << 8) | state->e;
+		HL += DE;
+		state->h = HL >> 8;
+		state->l = HL & 0xff;
+		state->cc.cy = (HL & 0xffff0000) != 0;
+		break;
+	}
 	case 0x1a: {
 		uint16_t DE = (state->d << 8) | state->e;
 		state->a = state->memory[DE];
@@ -166,7 +198,20 @@ int Emulate8080Op(State8080* state)
 		uint16_t HL = (state->h << 8) | state->l;
 		HL++;
 		state->h = HL >> 8;
-		state->l = HL & 0x0f;
+		state->l = HL & 0xff;
+		break;
+	}
+	case 0x26: {
+		state->h = opcode[1];
+		state->pc++;
+		break;
+	}
+	case 0x29: { // DAD H : HL *= 2
+		uint32_t HL = (state->h << 8) | state->l;
+		HL *= 2;
+		state->h = HL >> 8;
+		state->l = HL & 0xff;
+		state->cc.cy = (HL & 0xffff0000) != 0;
 		break;
 	}
 	case 0x2f: {
@@ -178,17 +223,54 @@ int Emulate8080Op(State8080* state)
 		state->pc += 2;
 		break;
 	}
+	case 0x32: { // STA adr
+		uint16_t address = (opcode[2] << 8) | opcode[1];
+		state->memory[address] = state->a;
+		state->pc += 2;
+		break;
+	}
 	case 0x36: {
 		uint16_t HL = (state->h << 8) | state->l;
 		state->memory[HL] = opcode[1];
+		state->pc++;
 		break;
 	}
 	case 0x37: {
 		state->cc.cy = 1;
 		break;
 	}
+	case 0x3a: { // LDA adr
+		uint16_t address = (opcode[2] << 8) | opcode[1];
+		state->a = state->memory[address];
+		state->pc += 2;
+		break;
+	}
+	case 0x3e: {
+		state->a = opcode[1];
+		state->pc++;
+		break;
+	}
 	case 0x3f: {
 		state->cc.cy = ~state->cc.cy;
+		break;
+	}
+	case 0x56: {
+		uint16_t HL = (state->h << 8) | state->l;
+		state->d = state->memory[HL];
+		break;
+	}
+	case 0x5e: {
+		uint16_t HL = (state->h << 8) | state->l;
+		state->e = state->memory[HL];
+		break;
+	}
+	case 0x66: {
+		uint16_t HL = (state->h << 8) | state->l;
+		state->h = state->memory[HL];
+		break;
+	}
+	case 0x6f: {
+		state->l = state->a;
 		break;
 	}
 	case 0x77: {
@@ -196,47 +278,77 @@ int Emulate8080Op(State8080* state)
 		state->memory[HL] = state->a;
 		break;
 	}
-
+	case 0x7a: {
+		state->a = state->d;
+		break;
+	}
+	case 0x7b: {
+		state->a = state->e;
+		break;
+	}
 	case 0x7c: {
 		state->a = state->h;
+		break;
+	}
+	case 0x7e: {
+		uint16_t HL = (state->h << 8) | state->l;
+		state->a = state->memory[HL];
 		break;
 	}
 	case 0x80: {
 		uint16_t res = (uint16_t)state->a + (uint16_t)state->b;
 		state->cc.z = (res & 0xff) == 0;
-		state->cc.s = (res & 0x80) == 1;
+		state->cc.s = (res & 0x80) == 0x80;
 		state->cc.cy = res > 0xff;
 		res &= 0xff;
 		state->a = res;
-		state->cc.p = Parity(res, 8);
+		state->cc.p = parity(res, 8);
 		break;
 	}
 
 	case 0x81: {
 		uint16_t res = (uint16_t)state->a + (uint16_t)state->c;
 		state->cc.z = (res & 0xff) == 0;
-		state->cc.s = (res & 0x80) == 1;
+		state->cc.s = (res & 0x80) == 0x80;
 		state->cc.cy = res > 0xff;
 		res &= 0xff;
 		state->a = res;
-		state->cc.p = Parity(res, 8);
+		state->cc.p = parity(res, 8);
 		break;
 	}
 	case 0x86: {
-		uint32_t HL = (state->h << 8) | state->l;
+		uint16_t HL = (state->h << 8) | state->l;
 		uint16_t res = (uint16_t)state->a + (uint16_t)state->memory[HL];
 		state->cc.z = (res & 0xff) == 0;
-		state->cc.s = (res & 0x80) == 1;
+		state->cc.s = (res & 0x80) == 0x80;
 		state->cc.cy = res > 0xff;
 		res &= 0xff;
 		state->a = res;
-		state->cc.p = Parity(res, 8);
+		state->cc.p = parity(res, 8);
 		break;
 	}
+	case 0xa7: { // ANA A
+		state->a &= state->a;
+
+		state->cc.z = state->a == 0;
+		state->cc.s = state->a >> 7;
+		state->cc.p = parity(state->a, 8);
+		state->cc.cy = 0;
+		break;
+	}
+	case 0xaf: { // TODO: extract to function
+		state->a ^= state->a;
+
+		state->cc.z = 1;
+		state->cc.s = 0;
+		state->cc.p = 1;
+		state->cc.cy = 0;
+		break;
+
+	}
 	case 0xc1: { // POP B
-		state->c = state->memory[state->sp];
-		state->b = state->memory[state->sp + 1];
-		state->sp += 2;
+		state->c = pop_byte(state);
+		state->b = pop_byte(state);
 		break;
 	}
 	case 0xc2: { // JNZ
@@ -248,24 +360,24 @@ int Emulate8080Op(State8080* state)
 		}
 		break;
 	}
-	case 0xc3: {
+	case 0xc3: { // JMP
 		state->pc = (opcode[2] << 8) | opcode[1];
 		break;
 	}
-	case 0xc5: { // PUHS B
-		state->memory[state->sp - 1] = state->b;
-		state->memory[state->sp - 2] = state->c;
-		state->sp -= 2;
+	case 0xc5: { // PUSH B
+		push(state, state->b, state->c);
 		break;
 	}
 	case 0xc6: {
 		uint16_t res = (uint16_t)state->a + (uint16_t)opcode[1];
 		state->cc.z = (res & 0xff) == 0;
-		state->cc.s = (res & 0x80) == 1;
+		state->cc.s = (res & 0x80) == 0x80;
 		state->cc.cy = res > 0xff;
 		res &= 0xff;
 		state->a = res;
-		state->cc.p = Parity(res, 8);
+		state->cc.p = parity(res, 8);
+
+		state->pc++;
 		break;
 	}
 
@@ -277,7 +389,7 @@ int Emulate8080Op(State8080* state)
 		state->sp += 2;
 		break;
 	}
-	case 0xcd: {
+	case 0xcd: { // CALL
 		uint16_t ret = state->pc + 2;
 		state->memory[state->sp - 1] = (ret >> 8) & 0xff;
 		state->memory[state->sp - 2] = ret & 0xff;
@@ -285,13 +397,26 @@ int Emulate8080Op(State8080* state)
 		state->pc = (opcode[2] << 8) | opcode[1];
 		break;
 	}
-
+	case 0xd1: { // POP D
+		state->e = pop_byte(state);
+		state->d = pop_byte(state);
+		break;
+	}
 	case 0xd3: { // Will come back for it, for now just skip the data byte
 		state->pc++;
 		break;
 	}
+	case 0xd5: { // PUSH D
+		push(state, state->d, state->e);
+		break;
+	}
 	case 0xdb: { // Will come back for it, for now just skip the data byte
 		state->pc++;
+		break;
+	}
+	case 0xe1: {
+		state->l = pop_byte(state);
+		state->h = pop_byte(state);
 		break;
 	}
 	case 0xe3: {
@@ -299,11 +424,16 @@ int Emulate8080Op(State8080* state)
 
 		break;
 	}
+
+	case 0xe5: {
+		push(state, state->h, state->l);
+		break;
+	}
 	case 0xe6: {
 		state->a &= opcode[1];
 		state->cc.z = state->a == 0;
 		state->cc.s = (state->a >> 7);
-		state->cc.p = Parity(state->a, 8);
+		state->cc.p = parity(state->a, 8);
 		state->cc.cy = 0;
 		state->pc++;
 		break;
@@ -313,17 +443,27 @@ int Emulate8080Op(State8080* state)
 		state->pc = (state->h << 8) | state->l;
 		break;
 	}
-	case 0xf1: { // POP PSW TODO: validate that the flag bit mapping is correct. I used the data book mapping, but the emulator101 guide uses a different one for some reason.
-		byteToFlags(state, state->memory[state->sp]);
 
-		state->a = state->memory[state->sp + 1];
-		state->sp += 2;
+	case 0xeb: {
+		uint8_t tmpH = state->h;
+		uint8_t tmpL = state->l;
+		state->h = state->d;
+		state->l = state->e;
+		state->d = tmpH;
+		state->e = tmpL;
+		break;
+	}
+	case 0xf1: { // POP PSW TODO: validate that the flag bit mapping is correct. I used the data book mapping, but the emulator101 guide uses a different one for some reason.
+		byte_to_flags(state, pop_byte(state));
+		state->a = pop_byte(state);
+		break;
+	}
+	case 0xf3: { // DI
+		state->interrupt_enable = false;
 		break;
 	}
 	case 0xf5: { // PUSH PSW TODO: validate that the flag bit mapping is correct. I used the data book mapping, but the emulator101 guide uses a different one for some reason.
-		state->memory[state->sp - 1] = state->a;
-		state->memory[state->sp - 2] = (state->cc.cy) | (state->cc.p << 2) | (state->cc.ac << 4) | (state->cc.z << 6) | (state->cc.s << 7);
-		state->sp -= 2;
+		push(state, state->a, flags_to_byte(state));
 		break;
 	}
 
@@ -339,12 +479,16 @@ int Emulate8080Op(State8080* state)
 
 		break;
 	}
+	case 0xfb: { // EI
+		state->interrupt_enable = true;
+		break;
+	}
 	case 0xfe: {
 		uint8_t sub = state->a - opcode[1];
 		state->cc.z = sub == 0;
 		state->cc.s = (sub & 0x80) >> 7;
-		state->cc.p = Parity(sub, 8);
-		state->cc.cy = sub < 0;
+		state->cc.p = parity(sub, 8);
+		state->cc.cy = state->a < opcode[1];
 
 		state->pc++;
 		break;
@@ -353,7 +497,7 @@ int Emulate8080Op(State8080* state)
 
 	default:
 		state->pc--;
-		UnimplementedInstruction(state);
+		unimplemented_instruction(state);
 
 	}
 

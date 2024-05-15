@@ -24,7 +24,7 @@ typedef struct State8080 {
 	uint16_t pc;
 	uint8_t* memory;
 	struct ConditionCodes cc;
-	uint8_t     int_enable;
+	uint8_t     interrupt_enable;
 } State8080;
 
 ///
@@ -32,9 +32,9 @@ typedef struct State8080 {
 /// Emulates the next opcode based on the given machine state and updates the states accordingly.
 /// </summary>
 /// <param name="state"></param>
-int Emulate8080Op(State8080* state);
+int emulate_8080_op(State8080* state);
 
 
-State8080* initState();
+State8080* init_state();
 
-void freeState(State8080* state);
+void free_state(State8080* state);
