@@ -26,7 +26,7 @@ int disassemble_8080_op(unsigned char* codebuffer, int pc)
 	case 0x08: printf("NOP"); break;
 
 
-	case 0x09: printf("DADB"); break;
+	case 0x09: printf("DAD    B"); break;
 	case 0x0a: printf("LDAX   B"); break;
 	case 0x0b: printf("DCX    B"); break;
 	case 0x0c: printf("INR    C"); break;
