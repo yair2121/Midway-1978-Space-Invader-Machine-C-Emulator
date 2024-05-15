@@ -128,7 +128,7 @@ int emulate_8080_op(State8080* state)
 		uint32_t HL = (state->h << 8) | state->l;
 		uint32_t BC = (state->b << 8) | state->c;
 		uint32_t combined = HL + BC;
-		state->h = (combined & 0xff00 >> 8);
+		state->h = (combined & 0xff00) >> 8;
 		state->l = combined & 0xff;
 		state->cc.cy = (combined & 0xffff0000) > 0;
 		break;
