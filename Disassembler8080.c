@@ -8,7 +8,7 @@
 /// <param name="codebuffer">Valid pointer to 8080 assembly code</param>
 /// <param name="pc">Current offset into the code</param>
 /// <returns>Size of op in bytes</returns>
-int Disassemble8080Op(unsigned char* codebuffer, int pc)
+int disassemble_8080_op(unsigned char* codebuffer, int pc)
 {
 	unsigned char* code = &codebuffer[pc];
 	int opbytes = 1;
@@ -26,7 +26,7 @@ int Disassemble8080Op(unsigned char* codebuffer, int pc)
 	case 0x08: printf("NOP"); break;
 
 
-	case 0x09: printf("DADB"); break;
+	case 0x09: printf("DAD    B"); break;
 	case 0x0a: printf("LDAX   B"); break;
 	case 0x0b: printf("DCX    B"); break;
 	case 0x0c: printf("INR    C"); break;
@@ -237,7 +237,7 @@ int Disassemble8080Op(unsigned char* codebuffer, int pc)
 	case 0xc0: printf("RNZ"); break;
 	case 0xc1: printf("POP    B"); break;
 
-	case 0xc2: printf("JMZ    $%02x%02x", code[2], code[1]); opbytes = 3; break;
+	case 0xc2: printf("JNZ    $%02x%02x", code[2], code[1]); opbytes = 3; break;
 	case 0xc3: printf("JMP    $%02x%02x", code[2], code[1]); opbytes = 3; break;
 
 	case 0xc4: printf("CNZ    $%02x%02x", code[2], code[1]); opbytes = 3; break;
@@ -306,9 +306,9 @@ int Disassemble8080Op(unsigned char* codebuffer, int pc)
 }
 
 
-void DisassembleCode(size_t size, unsigned char* codebuffer) {
+void disassemble_code(size_t size, unsigned char* codebuffer) {
 
 	for (int pc = 0; pc < size;) {
-		pc += Disassemble8080Op(codebuffer, pc); // TODO: return the code instead of printing it.
+		pc += disassemble_8080_op(codebuffer, pc); // TODO: return the code instead of printing it.
 	}
 }
