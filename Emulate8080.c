@@ -78,9 +78,6 @@ int emulate_8080_op(State8080* state)
 {
 	unsigned char* opcode = &state->memory[state->pc];
 	print_state(state);
-	if (counter == 1554) {
-		int b = 3;
-	}
 	state->pc += 1;
 
 
