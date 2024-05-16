@@ -2,6 +2,7 @@
 #include <inttypes.h>
 #include <stdlib.h>
 #include <stdbool.h>
+#include <string.h>
 
 typedef struct ConditionCodes {
 	uint8_t    z : 1;
@@ -35,6 +36,6 @@ typedef struct State8080 {
 int emulate_8080_op(State8080* state);
 
 
-State8080* init_state();
+State8080* init_state(size_t size, unsigned char* codeBuffer);
 
 void free_state(State8080* state);

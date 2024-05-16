@@ -46,10 +46,12 @@ static void unimplemented_instruction(State8080* state)
 	exit(EXIT_FAILURE);
 }
 
-State8080* init_state() {
+State8080* init_state(size_t size, unsigned char* codeBuffer) {
 	State8080* state = (State8080*)calloc(1, sizeof(State8080));
 
-	state->memory = (uint8_t*)calloc(200000, sizeof(uint8_t)); // TODO: check the correct size;
+	size_t memorySize = 200000; // TODO: check the correct size;
+	state->memory = (uint8_t*)calloc(memorySize, sizeof(uint8_t));
+	memcpy_s(state->memory, 200000, codeBuffer, size);
 	return state;
 }
 
