@@ -29,12 +29,10 @@ static uint8_t flags_to_byte(State8080* state) {
 	return flags;
 }
 
-int counter = 0;
-
 static void print_state(State8080* state) {
 	printf("\n\n\n");
 	disassemble_8080_op(state->memory, state->pc);
-	printf("\tcounter=%d, C=%d,P=%d,S=%d,Z=%d\n", counter++, state->cc.cy, state->cc.p,
+	printf("\C=%d,P=%d,S=%d,Z=%d\n", state->cc.cy, state->cc.p,
 		state->cc.s, state->cc.z);
 	printf("\tAF: $%02x%02x BC: $%02x%02x DE: $%02x%02x HL $%02x%02x PC %04x SP %04x\n\n\n",
 		state->a, flags_to_byte(state), state->b, state->c, state->d,
@@ -56,7 +54,7 @@ State8080* init_state() {
 }
 
 void free_state(State8080* state) {
-	//free(state->memory);
+	free(state->memory);
 	free(state);
 }
 
@@ -105,7 +103,7 @@ int emulate_8080_op(State8080* state)
 		uint16_t bc = (state->b << 8) | state->c;
 		state->memory[bc] = state->a;
 		break;
-	} 
+	}
 	case 0x05: {
 		state->b--;
 		state->cc.z = state->b == 0;
