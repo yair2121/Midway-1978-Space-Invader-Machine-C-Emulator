@@ -46,15 +46,16 @@ static void unimplemented_instruction(State8080* state)
 	exit(EXIT_FAILURE);
 }
 
-Cpu8080* init_cpu(readPortFunc readPort, size_t size, uint8_t* codeBuffer) {
+Cpu8080* init_cpu(readPortFunc readPort, writePortFunc writePort, size_t bufferSize, uint8_t* codeBuffer) {
 	Cpu8080* cpu = (Cpu8080*)calloc(1, sizeof(Cpu8080));
 	cpu->readPort = readPort;
+	cpu->writePort = writePort;
 
 	cpu->state = (State8080*)calloc(1, sizeof(State8080));
 
 	size_t memorySize = 0x10000; // 16K
 	cpu->state->memory = (uint8_t*)calloc(memorySize, sizeof(uint8_t));
-	memcpy_s(cpu->state->memory, memorySize, codeBuffer, size);
+	memcpy_s(cpu->state->memory, memorySize, codeBuffer, bufferSize);
 
 	return cpu;
 }
@@ -407,7 +408,8 @@ int emulate_8080_op(Cpu8080* cpu)
 		state->d = pop_byte(state);
 		break;
 	}
-	case 0xd3: { // Will come back for it, for now just skip the data byte
+	case 0xd3: { // OUT
+		cpu->writePort(opcode[1], state->a);
 		state->pc++;
 		break;
 	}
