@@ -46,18 +46,23 @@ static void unimplemented_instruction(State8080* state)
 	exit(EXIT_FAILURE);
 }
 
-State8080* init_state(size_t size, unsigned char* codeBuffer) {
-	State8080* state = (State8080*)calloc(1, sizeof(State8080));
+Cpu8080* init_cpu(readPortFunc readPort, size_t size, uint8_t* codeBuffer) {
+	Cpu8080* cpu = (Cpu8080*)calloc(1, sizeof(Cpu8080));
+	cpu->readPort = readPort;
 
-	size_t memorySize = 200000; // TODO: check the correct size;
-	state->memory = (uint8_t*)calloc(memorySize, sizeof(uint8_t));
-	memcpy_s(state->memory, 200000, codeBuffer, size);
-	return state;
+	cpu->state = (State8080*)calloc(1, sizeof(State8080));
+
+	size_t memorySize = 0x10000; // 16K
+	cpu->state->memory = (uint8_t*)calloc(memorySize, sizeof(uint8_t));
+	memcpy_s(cpu->state->memory, memorySize, codeBuffer, size);
+
+	return cpu;
 }
 
-void free_state(State8080* state) {
-	free(state->memory);
-	free(state);
+void free_cpu(Cpu8080* cpu) {
+	free(cpu->state->memory);
+	free(cpu->state);
+	free(cpu);
 }
 
 static void push(State8080* state, uint8_t arg1, uint8_t arg2) {
@@ -74,12 +79,13 @@ static uint8_t pop_byte(State8080* state) {
 }
 
 
-int emulate_8080_op(State8080* state)
+int emulate_8080_op(Cpu8080* cpu)
 {
-	unsigned char* opcode = &state->memory[state->pc];
+	State8080* state = cpu->state;
+	uint8_t* opcode = &state->memory[state->pc];
+	
 	print_state(state);
 	state->pc += 1;
-
 
 	switch (*opcode)
 	{
@@ -409,7 +415,8 @@ int emulate_8080_op(State8080* state)
 		push(state, state->d, state->e);
 		break;
 	}
-	case 0xdb: { // Will come back for it, for now just skip the data byte
+	case 0xdb: { // IN
+		state->a = cpu->readPort(opcode[1]);
 		state->pc++;
 		break;
 	}
