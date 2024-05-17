@@ -28,14 +28,31 @@ typedef struct State8080 {
 	uint8_t     interrupt_enable;
 } State8080;
 
-///
 /// <summary>
-/// Emulates the next opcode based on the given machine state and updates the states accordingly.
+/// Read port value from the current machine into the 8080 cpu.
+/// </summary>
+typedef uint8_t(*readPortFunc)(uint8_t port);
+
+/// <summary>
+/// Write a value to given port on 8080 cp to current machine.
+/// </summary>
+typedef uint8_t(*writePortFunc)(uint8_t port, uint8_t value);
+
+
+typedef struct cpu8080 {
+	State8080* state;
+	readPortFunc readPort;
+	writePortFunc writePort;
+} Cpu8080;
+
+
+/// <summary>
+
 /// </summary>
 /// <param name="state"></param>
-int emulate_8080_op(State8080* state);
+/// <returns></returns>
+int emulate_8080_op(Cpu8080* cpu);
 
+Cpu8080* init_cpu(readPortFunc readPort, writePortFunc writePort, size_t bufferSize, uint8_t* codeBuffer);
 
-State8080* init_state(size_t size, unsigned char* codeBuffer);
-
-void free_state(State8080* state);
+void free_cpu(Cpu8080* state);
