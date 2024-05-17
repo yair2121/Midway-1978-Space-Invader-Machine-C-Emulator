@@ -39,7 +39,7 @@ typedef uint8_t(*readPortFunc)(uint8_t port);
 typedef uint8_t(*writePortFunc)(uint8_t port, uint8_t value);
 
 
-typedef struct cpu8080 {
+typedef struct Cpu8080 {
 	State8080* state;
 	readPortFunc readPort;
 	writePortFunc writePort;
