@@ -46,18 +46,21 @@ static void unimplemented_instruction(State8080* state)
 	exit(EXIT_FAILURE);
 }
 
-Cpu8080* init_cpu(readPortFunc readPort, writePortFunc writePort, size_t bufferSize, uint8_t* codeBuffer) {
+Cpu8080* init_cpu_state(size_t bufferSize, uint8_t* codeBuffer, size_t memorySize) {
 	Cpu8080* cpu = (Cpu8080*)calloc(1, sizeof(Cpu8080));
-	cpu->readPort = readPort;
-	cpu->writePort = writePort;
 
 	cpu->state = (State8080*)calloc(1, sizeof(State8080));
 
-	size_t memorySize = 0x10000; // 16K
 	cpu->state->memory = (uint8_t*)calloc(memorySize, sizeof(uint8_t));
 	memcpy_s(cpu->state->memory, memorySize, codeBuffer, bufferSize);
 
 	return cpu;
+}
+
+void set_in_out_ports(Cpu8080* cpu, InTask inTask, OutTask outTask)
+{
+	cpu->inTask = inTask;
+	cpu->outTask = outTask;
 }
 
 void free_cpu(Cpu8080* cpu) {
@@ -409,7 +412,7 @@ int emulate_8080_op(Cpu8080* cpu)
 		break;
 	}
 	case 0xd3: { // OUT
-		cpu->writePort(opcode[1], state->a);
+		cpu->outTask.writePort(opcode[1], state->a, cpu->outTask.context);
 		state->pc++;
 		break;
 	}
@@ -418,7 +421,7 @@ int emulate_8080_op(Cpu8080* cpu)
 		break;
 	}
 	case 0xdb: { // IN
-		state->a = cpu->readPort(opcode[1]);
+		state->a = cpu->inTask.readPort(opcode[1], cpu->inTask.context);
 		state->pc++;
 		break;
 	}
