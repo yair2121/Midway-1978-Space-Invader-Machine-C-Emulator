@@ -34,9 +34,9 @@ typedef struct State8080 {
 typedef uint8_t *readPortFunc (uint8_t port, void* context);
 
 /// <summary>
-/// Write a value to given port on 8080 cp to current machine.
+/// Write a value to given port on 8080 cpu to current machine.
 /// </summary>
-typedef uint8_t writePortFunc (uint8_t port, uint8_t value, void* context);
+typedef void writePortFunc (uint8_t port, uint8_t value, void* context);
 
 /// <summary>
 /// Holds both the readPort function, and the machine context required for it to actually read the port.
