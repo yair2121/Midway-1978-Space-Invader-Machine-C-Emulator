@@ -1,6 +1,6 @@
 #include <inttypes.h>
 #include <stdio.h>
-
+#include "Disassembler8080.h"
 
 /// <summary>
 /// Print the next Opcode. 

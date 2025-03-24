@@ -1,4 +1,5 @@
 #include "Emulate8080.h"
+#include "Disassembler8080.h"
 
 static bool parity(int value, int size) {
 	value = (value & ((1 << size) - 1));
