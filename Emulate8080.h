@@ -70,7 +70,7 @@ typedef struct Cpu8080 {
 int emulate_8080_op(Cpu8080* cpu);
 
 
-
+void GenerateInterrupt(State8080* state, int interrupt_num);
 Cpu8080* init_cpu_state(size_t bufferSize, uint8_t* codeBuffer, size_t memorySize);
 
 /// <summary>

@@ -82,9 +82,18 @@ static uint8_t pop_byte(State8080* state) {
 	return result;
 }
 
+void GenerateInterrupt(State8080* state, int interrupt_num) {
+	//perform "PUSH PC"
+	push(state, (state->pc & 0xFF00) >> 8, (state->pc & 0xff));
 
-int emulate_8080_op(Cpu8080* cpu)
-{
+
+	//Set the PC to the low memory vector.    
+	//This is identical to an "RST interrupt_num" instruction.    
+	state->pc = 8 * interrupt_num;
+}
+
+
+int emulate_8080_op(Cpu8080* cpu) {
 	State8080* state = cpu->state;
 	uint8_t* opcode = &state->memory[state->pc];
 	
