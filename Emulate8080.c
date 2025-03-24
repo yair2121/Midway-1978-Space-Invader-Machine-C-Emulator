@@ -49,10 +49,22 @@ static void unimplemented_instruction(State8080* state)
 
 Cpu8080* init_cpu_state(size_t bufferSize, uint8_t* codeBuffer, size_t memorySize) {
 	Cpu8080* cpu = (Cpu8080*)calloc(1, sizeof(Cpu8080));
+	if (cpu == NULL) {
+		return NULL;
+	}
 
 	cpu->state = (State8080*)calloc(1, sizeof(State8080));
+	if (cpu->state == NULL) {
+		free(cpu);
+		return NULL;
+	}
 
 	cpu->state->memory = (uint8_t*)calloc(memorySize, sizeof(uint8_t));
+	if (cpu->state->memory == NULL) {
+		free(cpu->state);
+		free(cpu);
+		return NULL;
+	}
 	memcpy_s(cpu->state->memory, memorySize, codeBuffer, bufferSize);
 
 	return cpu;
