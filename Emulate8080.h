@@ -4,6 +4,12 @@
 #include <stdbool.h>
 #include <string.h>
 
+typedef enum REGISTER_PAIR {
+	BC,
+	DE = 1,
+	HL = 2,
+} REGISTER_PAIR;
+
 typedef struct ConditionCodes {
 	uint8_t    z : 1;
 	uint8_t    s : 1;
@@ -27,6 +33,7 @@ typedef struct State8080 {
 	struct ConditionCodes cc;
 	uint8_t     interrupt_enable;
 } State8080;
+
 
 /// <summary>
 /// Read port value from the current machine into the 8080 cpu.
@@ -62,6 +69,8 @@ typedef struct Cpu8080 {
 } Cpu8080;
 
 
+uint8_t get_next_opcode(State8080* state);
+
 /// <summary>
 
 /// </summary>
@@ -69,8 +78,15 @@ typedef struct Cpu8080 {
 /// <returns></returns>
 int emulate_8080_op(Cpu8080* cpu);
 
+/// <summary>
+/// Return the real number of cycles that will take for the 8080 cpu to run given opcode.
+/// </summary>
+/// <param name="opcode"></param>
+/// <returns></returns>
+int opcode_to_cycles(uint8_t opcode);
 
-void GenerateInterrupt(State8080* state, int interrupt_num);
+
+void generate_interrupt(State8080* state, int interrupt_num);
 Cpu8080* init_cpu_state(size_t bufferSize, uint8_t* codeBuffer, size_t memorySize);
 
 /// <summary>
