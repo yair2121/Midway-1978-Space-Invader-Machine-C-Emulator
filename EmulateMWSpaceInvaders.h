@@ -1,6 +1,8 @@
 #pragma once
 #include <inttypes.h>
 
+#include "Emulate8080.h"
+
 typedef enum KEY {
 	LEFT = 0,
 	RIGHT = 1,
@@ -17,7 +19,6 @@ typedef enum PLAYER {
 	IRRELEVANT = 3
 } PLAYER;
 
-//const uint8_t MAP_TO_BIT[PLAYER_COUNT][KEY_COUNT] = { {0x20, 0x40, 0x10, 0x4,}, {1} };
 
 typedef struct Ports {
 	uint8_t iPorts[3];
@@ -34,10 +35,11 @@ typedef struct MWState {
 
 
 
+MWState* init_mw_state(Cpu8080* cpu);
 
-void machineOUT(uint8_t port, uint8_t value, Ports* portsState);
+void machine_OUT(uint8_t port, uint8_t value, Ports* portsState);
 
-uint8_t machineIN(uint8_t port, Ports* portsState);
+uint8_t machine_IN(uint8_t port, Ports* portsState);
 
-void machineKeyDown(KEY key, PLAYER player, Ports* portsState);
-void machineKeyUP(KEY key, PLAYER player, Ports* portsState);
+void machine_key_down(KEY key, PLAYER player, Ports* portsState);
+void machine_key_up(KEY key, PLAYER player, Ports* portsState);

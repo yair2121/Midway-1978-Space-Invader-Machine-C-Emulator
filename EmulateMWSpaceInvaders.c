@@ -1,5 +1,25 @@
 #include "EmulateMWSpaceInvaders.h"
 
+MWState* init_mw_state(Cpu8080* cpu) {
+	MWState* mwState = (MWState*)calloc(1, sizeof(MWState));
+	if (mwState == NULL) {
+		return NULL;
+	}
+	mwState->ports.iPorts[0] = 0;
+	mwState->ports.iPorts[1] = 0;
+	mwState->ports.iPorts[2] = 0;
+	mwState->ports.shiftValue = 0;
+	mwState->ports.shiftOffset = 0;
+	mwState->ports.oPorts3 = 0;
+	mwState->ports.oPorts5 = 0;
+	mwState->ports.oPorts6 = 0;
+
+	InTask inTask = { machine_IN, &mwState->ports };
+	OutTask outTask = { machine_OUT, &mwState->ports };
+	//machineState->mwState->ports.shiftValue = 5;
+	set_in_out_ports(cpu, inTask, outTask);
+	return mwState;
+}
 
 void machine_OUT(uint8_t port, uint8_t value, Ports* portsState) {
 
@@ -25,19 +45,20 @@ void machine_OUT(uint8_t port, uint8_t value, Ports* portsState) {
 	}
 }
 
-
-uint8_t machineIN(uint8_t port, Ports* portsState) {
+uint8_t machine_IN(uint8_t port, Ports* portsState) {
 	switch (port)
 	{
 	case 0:
 	case 1:
+		return 1; // TODO: check why it is like that
 	case 2:
-		return portsState->iPorts[port];
-		break;
+		return 0;
+		//return portsState->iPorts[port];
+		//break;
 	case 3: {
-		uint16_t shiftedValue = portsState->shiftValue << portsState->shiftOffset;
-		shiftedValue = (shiftedValue >> 8) & 0xff;
-		return (uint8_t) shiftedValue;
+		uint16_t shiftedValueResult = portsState->shiftValue << portsState->shiftOffset;
+		shiftedValueResult = (shiftedValueResult >> 8) & 0xff;
+		return (uint8_t) shiftedValueResult;
 	}
 	default: {
 		return 0; // TODO: Crash in this case
@@ -66,14 +87,14 @@ static uint8_t keyToBit(KEY key, PLAYER player) {
 	return 0x40; // RIGHT
 }
 
-void machineKeyDown(KEY key, PLAYER player, Ports* portsState)
+void machine_key_down(KEY key, PLAYER player, Ports* portsState)
 {
 	uint8_t port = keyToPort(key, player);
 	uint8_t bit = keyToBit(key, player);
 	portsState->iPorts[port] |= bit;
 }
 
-void machineKeyUP(KEY key, PLAYER player, Ports* portsState)
+void machine_key_up(KEY key, PLAYER player, Ports* portsState)
 {
 	uint8_t port = keyToPort(key, player);
 	uint8_t bit = ~keyToBit(key, player);
