@@ -241,7 +241,7 @@ int disassemble_8080_op(unsigned char* codebuffer, int pc)
 	case 0xc3: printf("JMP    $%02x%02x", code[2], code[1]); opbytes = 3; break;
 
 	case 0xc4: printf("CNZ    $%02x%02x", code[2], code[1]); opbytes = 3; break;
-	case 0xc5: printf("PUSH   B"); break;
+	case 0xc5: printf("PUSH   BC"); break;
 	case 0xc6: printf("ADI    #$%02x", code[1]); opbytes = 2; break;
 	case 0xc7: printf("RST    0"); break;
 	case 0xc8: printf("RZ"); break;
