@@ -1,12 +1,12 @@
 #include "EmulateMWSpaceInvaders.h"
 
 
-void machineOUT(uint8_t port, uint8_t value, Ports* portsState) {
+void machine_OUT(uint8_t port, uint8_t value, Ports* portsState) {
 
 	switch (port)
 	{
 	case 2: {
-		portsState->shiftOffset = value;
+		portsState->shiftOffset = value & 0b111;
 		break;
 	}
 	case 3: {
