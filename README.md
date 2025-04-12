@@ -1,3 +1,3 @@
-# 8080 CPU Emulator - Work in Progress
+# Midway-1978-Space-Invader-Machine-C-Emulator - Work in progress
 
-An Intel 8080 processor emulator written in C. Based on "http://www.emulator101.com" guide.
+Based on "http://www.emulator101.com" guide.
