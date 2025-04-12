@@ -76,6 +76,9 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>D:\Emulator_Development\SDL-main\include; $(ProjectDir)include</AdditionalIncludeDirectories>
+      <InlineFunctionExpansion>Disabled</InlineFunctionExpansion>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -90,6 +93,8 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>D:\Emulator_Development\SDL-main\include</AdditionalIncludeDirectories>
+      <InlineFunctionExpansion>Disabled</InlineFunctionExpansion>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -102,8 +107,11 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>TEST_MODE;_DEBUG;_CONSOLE;%(PreprocessorDefinitions);</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>D:\Emulator_Development\SDL-main\include; $(ProjectDir)include</AdditionalIncludeDirectories>
+      <InlineFunctionExpansion>Disabled</InlineFunctionExpansion>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -118,6 +126,8 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>D:\Emulator_Development\SDL-main\include</AdditionalIncludeDirectories>
+      <InlineFunctionExpansion>Disabled</InlineFunctionExpansion>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -127,12 +137,27 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="Disassembler8080.c" />
-    <ClCompile Include="Emulate8080.c" />
-    <ClCompile Include="main.c" />
+    <ClCompile Include="src\Disassembler8080.c" />
+    <ClCompile Include="src\Emulate8080.c" />
+    <ClCompile Include="src\EmulateMWSpaceInvaders.c" />
+    <ClCompile Include="src\main.c" />
+    <ClCompile Include="src\MWDisplay.c" />
+    <ClCompile Include="src\SpaceInvaderMachine.c" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Emulate8080.h" />
+    <ClInclude Include="include\Disassembler8080.h" />
+    <ClInclude Include="include\Emulate8080.h" />
+    <ClInclude Include="include\EmulateMWSpaceInvaders.h" />
+    <ClInclude Include="include\MWDisplay.h" />
+    <ClInclude Include="include\SpaceInvaderMachine.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="8080_Emulator.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\SDL-main\VisualC\SDL\SDL.vcxproj">
+      <Project>{81ce8daf-ebb2-4761-8e45-b71abcca8c68}</Project>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

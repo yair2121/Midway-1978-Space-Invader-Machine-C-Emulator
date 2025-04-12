@@ -12,12 +12,12 @@ static uint8_t pop_byte(State8080* state) {
 }
 static void write_to_memory(State8080* state, uint16_t offset, uint8_t value) {
 	if (offset < 0x2000) {
-		//printf("Error: Writing to ROM at %04x\n", offset);
+		printf("Error: Writing to ROM at %04x\n", offset);
 		//exit(EXIT_FAILURE);
 		return;
 	}
 	else if (offset >= 0x4000) {
-		//printf("Error: Writing outside of RAM at %04x\n", offset);
+		printf("Error: Writing outside of RAM at %04x\n", offset);
 		//exit(EXIT_FAILURE);
 		return;
 	}
