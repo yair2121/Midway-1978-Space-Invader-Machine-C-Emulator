@@ -39,7 +39,6 @@ static bool parity(int value, int size) {
 	}
 	return (activeBitCount % 2) == 0;
 }
-
 /// <summary>
 /// Parse given byte flags into the state.
 /// The data book describe the mapping from a byte to each flag.
@@ -320,11 +319,10 @@ int emulate_8080_op(Cpu8080* cpu) {
 		state->pc += 2;
 		break;
 	}
-	//case 0x02: {
-	//	uint16_t bc = get_register_pair(state, BC);
-	//	write_to_memory(state, bc, state->a);
-	//	break;
-	//}
+	case 0x02: {// STAX B
+		write_to_register_pair_address(state, BC, state->a); 
+		break;
+	}
 	case 0x03: { // INX B
 		uint16_t bc = get_register_pair(state, BC);
 		set_register_pair(state, BC, bc + 1);
@@ -364,13 +362,18 @@ int emulate_8080_op(Cpu8080* cpu) {
 		state->a = read_from_register_pair_address(state, BC);
 		break;
 	}
-	case 0x0d: { // DCR C
-		state->c--;
+	case 0x0b: { // INR C
+		uint16_t bc = get_register_pair(state, BC);
+		set_register_pair(state, BC, bc - 1);
+		break;
+	}
+	case 0x0c: { // INR C
+		state->c++;
 		set_flagsZSP(state, state->c);
 		break;
 	}
-	case 0x0c: { // INR C 
-		state->c++;
+	case 0x0d: { // DCR C
+		state->c--;
 		set_flagsZSP(state, state->c);
 		break;
 	}
@@ -388,6 +391,10 @@ int emulate_8080_op(Cpu8080* cpu) {
 		state->e = opcode[1];
 		state->d = opcode[2];
 		state->pc += 2;
+		break;
+	}
+	case 0x12: { // STAX D 
+		write_to_register_pair_address(state, DE, state->a);
 		break;
 	}
 	case 0x13: { // INC DE
@@ -408,6 +415,13 @@ int emulate_8080_op(Cpu8080* cpu) {
 		state->pc++;
 		break;
 	}
+	case 0x17: { // RAL
+		uint8_t prevCY = state->cc.cy;
+		uint8_t prevBit7 = (state->a & 0x80) >> 7;
+		state->a = (state->a << 1) | state->cc.cy;
+		state->cc.cy = prevBit7;
+		break;
+	}
 	case 0x19: { // DAD H
 		uint32_t hl = get_register_pair(state, HL);
 		uint32_t de = get_register_pair(state, DE);
@@ -418,6 +432,23 @@ int emulate_8080_op(Cpu8080* cpu) {
 	}
 	case 0x1a: { // LDAX D
 		state->a = read_from_register_pair_address(state, DE);
+		break;
+	}
+	case 0x1b: { // DCX D
+		uint16_t de = get_register_pair(state, DE);
+		set_register_pair(state, DE, de - 1);
+	}
+	case 0x1c: { // INR E
+		state->e++;
+		set_flagsZSP(state, state->e);
+	}
+	case 0x1d: { // DCR E
+		state->e--;
+		set_flagsZSP(state, state->e);
+	}
+	case 0x1e: { // MVI E,D8
+		state->e = opcode[1];
+		state->pc++;
 		break;
 	}
 
@@ -446,9 +477,29 @@ int emulate_8080_op(Cpu8080* cpu) {
 		set_register_pair(state, HL, hl + 1);
 		break;
 	}
+	case 0x24: { // INR H
+		state->h++;
+		set_flagsZSP(state, state->h);
+	}
+	case 0x25: { // DCR H
+		state->h--;
+		set_flagsZSP(state, state->h);
+	}
 	case 0x26: { // MVI H,D8
 		state->h = opcode[1];
 		state->pc++;
+		break;
+	}
+	case 0x27: { // DAA
+		if ((state->a & 0x0f) > 9) { // Space Invader does not use the AC flag, so I ignored it in this comparasion. For full emulation It needs to be considered here according to the data book
+			state->a += 0x06;
+		}
+
+		if (state->cc.cy || (state->a & 0xf0) > 9) {
+			uint8_t a_highNibble = (state->a & 0xf0) >> 4;
+			a_highNibble += 6;
+			state->a &= 0x0f | (a_highNibble << 4);
+		}
 		break;
 	}
 	case 0x29: { // DAD H
@@ -475,6 +526,11 @@ int emulate_8080_op(Cpu8080* cpu) {
 		set_flagsZSP(state, state->l);
 		break;
 	}
+	case 0x2d: { // DCR L
+		state->l--;
+		set_flagsZSP(state, state->l);
+		break;
+	}
 	case 0x2e: { // MVI L, D8
 		state->l = opcode[1];
 		state->pc++;
@@ -493,6 +549,10 @@ int emulate_8080_op(Cpu8080* cpu) {
 		uint16_t address = pair_to_address(opcode[1], opcode[2]);
 		write_to_memory(state, address, state->a);
 		state->pc += 2;
+		break;
+	}
+	case 0x33: { // INX SP
+		state->sp += 1;
 		break;
 	}
 	case 0x34: { // INR M
@@ -516,10 +576,21 @@ int emulate_8080_op(Cpu8080* cpu) {
 		state->cc.cy = 1;
 		break;
 	}
+	case 0x39: { // DAD SP
+		uint32_t hl = get_register_pair(state, HL);
+		uint32_t combined = hl + (uint32_t) state->sp;
+		set_register_pair(state, HL, combined & 0xffff);
+		state->cc.cy = (combined & 0xffff0000) != 0;
+		break;
+	}
 	case 0x3a: { // LDA adr
 		uint16_t address = pair_to_address(opcode[1], opcode[2]);
 		state->a = state->memory[address];
 		state->pc += 2;
+		break;
+	}
+	case 0x3b: { // DCX SP
+		state->sp -= 1;
 		break;
 	}
 	case 0x3c: { // INR A
@@ -537,15 +608,27 @@ int emulate_8080_op(Cpu8080* cpu) {
 		state->pc++;
 		break;
 	}
-	//case 0x3f: {
-	//	state->cc.cy = ~state->cc.cy;
-	//	break;
-	//}
+	case 0x3f: { // 0x3f
+		state->cc.cy = ~state->cc.cy;
+		break;
+	}
 	case 0x40: { // MOV B,B
 		break;
 	}
 	case 0x41: { // MOV B,C
 		state->b = state->c;
+		break;
+	}
+	case 0x42: { // MOV B,D
+		state->b = state->d;
+		break;
+	}
+	case 0x43: { // MOV B,E
+		state->b = state->e;
+		break;
+	}
+	case 0x44: { // MOV B,H
+		state->b = state->h;
 		break;
 	}
 	case 0x45: { // MOV B,L
@@ -571,8 +654,16 @@ int emulate_8080_op(Cpu8080* cpu) {
 		state->c = state->d;
 		break;
 	}
+	case 0x4b: { // MOV C,E
+		state->c = state->e;
+		break;
+	}
 	case 0x4c: { // MOV C,H
 		state->c = state->h;
+		break;
+	}
+	case 0x4d: { // MOV C,L
+		state->c = state->l;
 		break;
 	}
 	case 0x4e: { // MOV C,M
@@ -583,8 +674,27 @@ int emulate_8080_op(Cpu8080* cpu) {
 		state->c = state->a;
 		break;
 	}
+	case 0x50: { // MOV D,B
+		state->d = state->b;
+		break;
+	}
 	case 0x51: { // MOV D,C
 		state->d = state->c;
+		break;
+	}
+	case 0x52: { // MOV D,D
+		break;
+	}
+	case 0x53: { // MOV D,E
+		state->d = state->e;
+		break;
+	}
+	case 0x54: { // MOV D,H
+		state->d = state->h;
+		break;
+	}
+	case 0x55: { // MOV D,L
+		state->d = state->l;
 		break;
 	}
 	case 0x56: { // MOV D,M
@@ -595,6 +705,29 @@ int emulate_8080_op(Cpu8080* cpu) {
 		state->d = state->a;
 		break;
 	}
+	case 0x58: { // MOV E,B
+		state->e = state->b;
+		break;
+	}
+	case 0x59: { // MOV E,C
+		state->e = state->c;
+		break;
+	}
+	case 0x5a: { // MOV E,D
+		state->e = state->d;
+		break;
+	}
+	case 0x5b: { // MOV E,E
+		break;
+	}
+	case 0x5c: { // MOV E,H
+		state->e = state->h;
+		break;
+	}
+	case 0x5d: { // MOV E,L
+		state->e = state->l;
+		break;
+	}
 	case 0x5e: { // MOV E,M
 		state->e = read_from_register_pair_address(state, HL);
 		break;
@@ -603,8 +736,23 @@ int emulate_8080_op(Cpu8080* cpu) {
 		state->e = state->a;
 		break;
 	}
+	case 0x60: { // MOV H,B
+		state->h = state->b;
+		break;
+	}
 	case 0x61: { // MOV H, C
 		state->h = state->c;
+		break;
+	}
+	case 0x62: { // MOV H,D
+		state->h = state->d;
+		break;
+	}
+	case 0x63: { // MOV H,E
+		state->h = state->e;
+		break;
+	}
+	case 0x64: { // MOV H,H
 		break;
 	}
 	case 0x65: { // MOV H,L
@@ -626,6 +774,25 @@ int emulate_8080_op(Cpu8080* cpu) {
 		state->l = state->c;
 		break;
 	}
+	case 0x6a: { // MOV L, D
+		state->l = state->d;
+		break;
+	}
+	case 0x6b: { // MOV L, E
+		state->l = state->e;
+		break;
+	}
+	case 0x6c: { // MOV L, H
+		state->l = state->h;
+		break;
+	}
+	case 0x6d: { // MOV L, L
+		break;
+	}
+	case 0x6e: { // MOV L, M
+		state->l = read_from_register_pair_address(state, HL);
+		break;
+	}
 	case 0x6f: { // MOV L,A
 		state->l = state->a;
 		break;
@@ -638,6 +805,25 @@ int emulate_8080_op(Cpu8080* cpu) {
 		write_to_register_pair_address(state, HL, state->c);
 		break;
 	}
+	case 0x72: { // MOV M,D
+		write_to_register_pair_address(state, HL, state->d);
+		break;
+	}
+	case 0x73: { // MOV M,E
+		write_to_register_pair_address(state, HL, state->e);
+		break;
+	}
+	case 0x74: { // MOV M,H
+		write_to_register_pair_address(state, HL, state->h);
+		break;
+	}
+	case 0x75: { // MOV M,L
+		write_to_register_pair_address(state, HL, state->l);
+		break;
+	}
+	case 0x76: { // HLT
+		break; // TODO: check if something need to be done here
+	}
 	case 0x77: { // MOV M,A
 		write_to_register_pair_address(state, HL, state->a);
 		break;
@@ -646,14 +832,8 @@ int emulate_8080_op(Cpu8080* cpu) {
 		state->a = state->b;
 		break;
 	}
-	case 0x79: {
+	case 0x79: { // MOV A,C
 		state->a = state->c;
-		break;
-	}
-	case 0x80: { // ADD B
-		uint16_t res = (uint16_t)state->a + (uint16_t)state->b;
-		set_flags(state, res);
-		state->a = res & 0xff;
 		break;
 	}
 	case 0x7a: { // MOV A,D
@@ -679,89 +859,256 @@ int emulate_8080_op(Cpu8080* cpu) {
 	case 0x7f: { // MOV A,A
 		break;
 	}
-
-	//case 0x80: {
-	//	uint16_t res = (uint16_t)state->a + (uint16_t)state->b;
-	//	value_to_flags(state, res);
-	//	state->a = res;
-	//	break;
-	//}
-
-	case 0x81: {
-		uint16_t res = (uint16_t)state->a + (uint16_t)state->c;
-		set_flags(state, res);
-		state->a = res & 0xff;
+	case 0x80: { // ADD B
+		ADD(state, state->b);
+		break;
+	}
+	case 0x81: { // ADD C
+		ADD(state, state->c);
+		break;
+	}
+	case 0x82: { // ADD D
+		ADD(state, state->d);
+		break;
+	}
+	case 0x83: { // ADD E
+		ADD(state, state->e);
+		break;
+	}
+	case 0x84: { // ADD H
+		ADD(state, state->h);
 		break;
 	}
 	case 0x85: { // ADD L
-		uint16_t res = (uint16_t)state->a + (uint16_t)state->l;
-		set_flags(state, res);
-		state->a = res & 0xff;
+		ADD(state, state->l);
 		break;
 	}
 	case 0x86: { // ADD M
-		uint16_t res = (uint16_t)state->a + (uint16_t)read_from_register_pair_address(state, HL);
-		set_flags(state, res);
-		state->a = res & 0xff;
+		ADD(state, read_from_register_pair_address(state, HL));
+		break;
+	}
+	case 0x87: { // ADD A
+		ADD(state, state->a);
+		break;
+	}
+	case 0x88: { // ADC B
+		ADC(state, state->b);
+		break;
+	}
+	case 0x89: { // ADC C
+		ADC(state, state->c);
+		break;
+	}
+	case 0x8a: { // ADC D
+		ADC(state, state->d);
+		break;
+	}
+	case 0x8b: { // ADC E
+		ADC(state, state->e);
+		break;
+	}
+	case 0x8c: { // ADC H
+		ADC(state, state->h);
+		break;
+	}
+	case 0x8d: { // ADC L
+		ADC(state, state->l);
+		break;
+	}
+	case 0x8e: { // ADC M
+		ADC(state, read_from_register_pair_address(state, HL));
+		break;
+	}
+	case 0x8f: { // ADC A
+		ADC(state, state->a);
+		break;
+	}
+	case 0x90: { // SUB B
+		SUB(state, state->b);
+		break;
+	}
+	case 0x91: { // SUB C
+		SUB(state, state->c);
+		break;
+	}
+	case 0x92: { // SUB D
+		SUB(state, state->d);
+		break;
+	}
+	case 0x93: { // SUB E
+		SUB(state, state->e);
+		break;
+	}
+	case 0x94: { // SUB H
+		SUB(state, state->h);
+		break;
+	}
+	case 0x95: { // SUB L
+		SUB(state, state->l);
+		break;
+	}
+	case 0x96: { // SUB M
+		SUB(state, read_from_register_pair_address(state, HL));
 		break;
 	}
 	case 0x97: { // SUB A
-		state->a = 0;
-		set_flags(state, state->a);
+		SUB(state, state->a);
+		break;
+	}
+	case 0x98: { // SBB B
+		SBB(state, state->b);
+		break;
+	}
+	case 0x99: { // SBB C
+		SBB(state, state->c);
+		break;
+	}
+	case 0x9a: { // SBB D
+		SBB(state, state->d);
+		break;
+	}
+	case 0x9b: { // SBB E
+		SBB(state, state->e);
+		break;
+	}
+	case 0x9c: { // SBB H
+		SBB(state, state->h);
+		break;
+	}
+	case 0x9d: { // SBB L
+		SBB(state, state->l);
+		break;
+	}
+	case 0x9e: { // SBB M
+		SBB(state, read_from_register_pair_address(state, HL));
+		break;
+	}
+	case 0x9f: { // SBB A
+		SBB(state, state->a);
 		break;
 	}
 	case 0xa0: { // ANA B
-		state->a &= state->b;
-		set_flags(state, state->a);
+		ANA(state, state->b);
 		break;
 	}
-	case 0xa7: { // ANA A
-		set_flags(state, state->a);
+	case 0xa1: { // ANA C
+		ANA(state, state->c);
+		break;
+	}
+	case 0xa2: { // ANA D
+		ANA(state, state->d);
+		break;
+	}
+	case 0xa3: { // ANA E
+		ANA(state, state->e);
+		break;
+	}
+	case 0xa4: { // ANA H
+		ANA(state, state->h);
+		break;
+	}
+	case 0xa5: { // ANA L
+		ANA(state, state->l);
 		break;
 	}
 	case 0xa6: { // ANA M
-		state->a &= read_from_register_pair_address(state, HL);
-		set_flags(state, state->a);
+		ANA(state, read_from_register_pair_address(state, HL));
+		break;
+	}
+	case 0xa7: { // ANA A
+		ANA(state, state->a);
 		break;
 	}
 	case 0xa8: { // XRA B
-		state->a ^= state->b;
-		set_flags(state, state->a);
+		XRA(state, state->b);
+		break;
+	}
+	case 0xa9: { // XRA C
+		XRA(state, state->c);
+		break;
+	}
+	case 0xaa: { // XRA D
+		XRA(state, state->d);
+		break;
+	}
+	case 0xab: { // XRA E
+		XRA(state, state->e);
+		break;
+	}
+	case 0xac: { // XRA H
+		XRA(state, state->h);
+		break;
+	}
+	case 0xad: { // XRA L
+		XRA(state, state->l);
+		break;
+	}
+	case 0xae: { // XRA M
+		XRA(state, read_from_register_pair_address(state, HL));
 		break;
 	}
 	case 0xaf: { // XRA A
-		state->a = 0;
-		set_flags(state, state->a);
+		XRA(state, state->a);
 		break;
 	}
 	case 0xb0: { // ORA B
-		state->a |= state->b;
-		set_flags(state, state->a);
+		ORA(state, state->b);
+		break;
+	}
+	case 0xb1: { // ORA C
+		ORA(state, state->c);
+		break;
+	}
+	case 0xb2: { // ORA D
+		ORA(state, state->d);
+		break;
+	}
+	case 0xb3: { // ORA E
+		ORA(state, state->e);
 		break;
 	}
 	case 0xb4: { // ORA H
-		state->a |= state->h;
-		set_flags(state, state->a);
+		ORA(state, state->h);
+		break;
+	}
+	case 0xb5: { // ORA L
+		ORA(state, state->l);
 		break;
 	}
 	case 0xb6: { // ORA M
-		state->a |= read_from_register_pair_address(state, HL);
-		set_flags(state, state->a);
+		ORA(state, read_from_register_pair_address(state, HL));
+		break;
+	}
+	case 0xb7: { // ORA A
+		ORA(state, state->a);
 		break;
 	}
 	case 0xb8: { // CMP B
-		uint16_t res = (uint16_t)state->a - (uint16_t)state->b;
-		set_flags(state, res);
+		CMP(state, state->b);
+		break;
+	}
+	case 0xb9: { // CMP C
+		CMP(state, state->c);
+		break;
+	}
+	case 0xba: { // CMP D
+		CMP(state, state->d);
 		break;
 	}
 	case 0xbc: { // CMP H
-		uint16_t compared = (uint16_t)state->a - (uint16_t)state->h;
-		set_flags(state, compared);
+		CMP(state, state->h);
+		break;
+	}
+	case 0xbd: { // CMP L
+		CMP(state, state->l);
 		break;
 	}
 	case 0xbe: { // CMP M
-		uint16_t compared = (uint16_t)state->a - (uint16_t)read_from_register_pair_address(state, HL);
-		set_flags(state, compared);
+		CMP(state, read_from_register_pair_address(state, HL));
+		break;
+	}
+	case 0xbf: { // CMP A
+		CMP(state, state->a);
 		break;
 	}
 	case 0xc0: { // RNZ
@@ -808,9 +1155,10 @@ int emulate_8080_op(Cpu8080* cpu) {
 		state->pc++;
 		break;
 	}
-	//case 0xc7: { // RST
-
-	//}
+	case 0xc7: { // RST
+		call_opcode(state, 0, 0);
+		break;
+	}
 	case 0xc8: { // RZ
 		if (state->cc.z == true) {
 			ret_opcode(state);
@@ -841,6 +1189,15 @@ int emulate_8080_op(Cpu8080* cpu) {
 	}
 	case 0xcd: { // CALL
 		call_opcode(state, opcode[1], opcode[2]);
+		break;
+	}
+	case 0xce: { //ACI D&
+		ADC(state, opcode[1]);
+		state->pc++;
+		break;
+	}
+	case 0xcf: { // RST 1
+		call_opcode(state, 0x08, 0);
 		break;
 	}
 	case 0xd0: { // RNC
@@ -890,6 +1247,10 @@ int emulate_8080_op(Cpu8080* cpu) {
 		break;
 
 	}
+	case 0xd7: { // RST 2
+		call_opcode(state, 0x10, 0);
+		break;
+	}
 	case 0xd8: {
 		if (state->cc.cy == true) {
 			ret_opcode(state);
@@ -910,6 +1271,15 @@ int emulate_8080_op(Cpu8080* cpu) {
 		state->pc++;
 		break;
 	}
+	case 0xdc: { // CC adr
+		if (state->cc.cy == true) {
+			call_opcode(state, opcode[1], opcode[2]);
+		}
+		else {
+			state->pc += 2;
+		}
+		break;
+	}
 	case 0xde: { // SBI D8
 		uint16_t res = state->a - opcode[1] - state->cc.cy;
 		set_flagsZSP(state, state->a);
@@ -918,10 +1288,28 @@ int emulate_8080_op(Cpu8080* cpu) {
 		state->pc++;
 		break;
 	}
+	case 0xdf: { // RST 3
+		call_opcode(state, 0x18, 0);
+		break;
+	}
+	case 0xe0: { // RPO
+		if (state->cc.p == false) {
+			ret_opcode(state);
+		}
+		break;
+	}
 	case 0xe1: { // POP H
 		state->l = pop_byte(state);
 		state->h = pop_byte(state);
 		break;
+	}
+	case 0xe2: { // JPO
+		if (state->cc.p == false) {
+			jmp_opcode(state, opcode[1], opcode[2]);
+		}
+		else {
+			state->pc += 2;
+		}
 	}
 	case 0xe3: { // XTHL
 		uint8_t tmpH = state->h;
@@ -934,7 +1322,15 @@ int emulate_8080_op(Cpu8080* cpu) {
 		write_to_memory(state, state->sp + 1, tmpH);
 		break;
 	}
-
+	case 0xe4: { // CPO adr
+		if (state->cc.p == false) {
+			call_opcode(state, opcode[1], opcode[2]);
+		}
+		else {
+			state->pc += 2;
+		}
+		break;
+	}
 	case 0xe5: { // PUSH H
 		push_pair(state, HL);
 		break;
@@ -943,6 +1339,16 @@ int emulate_8080_op(Cpu8080* cpu) {
 		state->a &= opcode[1];
 		set_flags(state, state->a);
 		state->pc++;
+		break;
+	}
+	case 0xe7: { // RST 4
+		call_opcode(state, 0x20, 0);
+		break;
+	}
+	case 0xe8: { // RPE
+		if (state->cc.p == true) {
+			ret_opcode(state);
+		}
 		break;
 	}
 	case 0xe9: { // PCHL
@@ -969,13 +1375,55 @@ int emulate_8080_op(Cpu8080* cpu) {
 		state->e = tmpL;
 		break;
 	}
+	case 0xec: { // CPE adr
+		if (state->cc.p == true) {
+			call_opcode(state, opcode[1], opcode[2]);
+		}
+		else {
+			state->pc += 2;
+		}
+		break;
+	}
+	case 0xee: { // XRI D8
+		XRA(state, opcode[1]);
+		state->pc++;
+		break;
+	}
+	case 0xef: { // RST 5
+		call_opcode(state, 0x28, 0);
+		break;
+	}
+	case 0xf0: { // RP
+		if (state->cc.s == false) {
+			ret_opcode(state);
+		}
+		break;
+	}
 	case 0xf1: { // POP PSW TODO: validate that the flag bit mapping is correct. I used the data book mapping, but the emulator101 guide uses a different one for some reason.
 		byte_to_flags(state, pop_byte(state)); // TODO: validate that this implemenation is correct. In the guide code he is not doing this line
 		state->a = pop_byte(state);
 		break;
 	}
+	case 0xf2: {
+		if (state->cc.s == false) {
+			jmp_opcode(state, opcode[1], opcode[2]);
+		}
+		else {
+			state->pc += 2;
+		}
+		break;
+	}
 	case 0xf3: { // DI
 		state->interrupt_enable = false;
+		break;
+	}
+	case 0xf4: { // CPE adr
+		if (state->cc.s == false) {
+			call_opcode(state, opcode[1], opcode[2]);
+		}
+		else {
+			state->pc += 2;
+		}
 		break;
 	}
 	case 0xf5: { // PUSH PSW TODO: validate that the flag bit mapping is correct. I used the data book mapping, but the emulator101 guide uses a different one for some reason.
@@ -990,17 +1438,20 @@ int emulate_8080_op(Cpu8080* cpu) {
 		break;
 
 	}
-	//case 0xf9: { // SPHL
-	//	uint8_t tempL = state->l;
-	//	uint8_t tempH = state->h;
-	//	state->l = state->memory[state->sp];
-	//	state->h = state->memory[state->sp + 1];
-
-	//	write_to_memory(state, state->sp, tempL);
-	//	write_to_memory(state, state->sp + 1, tempH);
-
-	//	break;
-	//}
+	case 0xf7: { // RST 6
+		call_opcode(state, 0x30, 0);
+		break;
+	}
+	case 0xf8: { // RM
+		if (state->cc.s == true) {
+			ret_opcode(state);
+		}
+		break;
+	}
+	case 0xf9: { // SPHL
+		state->sp = get_register_pair(state, HL);
+		break;
+	}
 	case 0xfa: { // JM adr
 		if (state->cc.s == true) {
 			jmp_opcode(state, opcode[1], opcode[2]);
@@ -1015,6 +1466,15 @@ int emulate_8080_op(Cpu8080* cpu) {
 		state->interrupt_enable = true;
 		break;
 	}
+	case 0xfc: { // CM D8
+		if (state->cc.s == true) {
+			call_opcode(state, opcode[1], opcode[2]);
+		}
+		else {
+			state->pc += 2;
+		}
+		break;
+	}
 	case 0xfe: { // CPI D*
 		uint8_t sub = state->a - opcode[1];
 		set_flagsZSP(state, sub);
@@ -1022,9 +1482,13 @@ int emulate_8080_op(Cpu8080* cpu) {
 		state->pc++;
 		break;
 	}
+	case 0xff: { // RST 7
+		call_opcode(state, 0x38, 0);
+		break;
+	}
 	default:
 		state->pc--;
 		unimplemented_instruction(state);
 	}
 	return 0;
-}
+} 
