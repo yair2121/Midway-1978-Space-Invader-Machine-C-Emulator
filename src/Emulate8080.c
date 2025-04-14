@@ -129,6 +129,48 @@ Cpu8080* init_cpu_state(size_t bufferSize, uint8_t* codeBuffer, size_t memorySiz
 	return cpu;
 }
 
+static void ADD(State8080* state, uint16_t value) {
+	uint16_t result = (uint16_t)state->a + value;
+	state->a = result & 0xff;
+	set_flags(state, result);
+}
+
+static void ADC(State8080* state, uint16_t value) {
+	uint16_t result = (uint16_t)state->a + value + state->cc.cy;
+	state->a = result & 0xff;
+	set_flags(state, result);
+}
+
+static void SUB(State8080* state, uint16_t value) {
+	uint16_t result = (uint16_t)state->a - value;
+	state->a = result & 0xff;
+	set_flags(state, result);
+}
+
+static void SBB(State8080* state, uint16_t value) {
+	uint16_t result = (uint16_t)state->a - value - state->cc.cy;
+	state->a = result & 0xff;
+	set_flags(state, result);
+}
+
+static void ANA(State8080* state, uint8_t value) {
+	state->a = state->a & value;
+	set_flags(state, state->a);
+}
+
+static void XRA(State8080* state, uint8_t value) {
+	state->a = state->a ^ value;
+	set_flags(state, state->a);
+}
+static void ORA(State8080* state, uint8_t value) {
+	state->a = state->a | value;
+	set_flags(state, state->a);
+}
+static void CMP(State8080* state, uint16_t value) {
+	uint16_t result = (uint16_t)state->a - value;
+	set_flags(state, result);
+}
+
 void set_in_out_ports(Cpu8080* cpu, InTask inTask, OutTask outTask)
 {
 	cpu->inTask = inTask;
