@@ -9,7 +9,7 @@ typedef enum KEY {
 	SHOOT = 2,
 	START = 3,
 	TILT = 4,
-	KEY_COUNT = 5
+	COIN = 5,
 } KEY;
 
 typedef enum PLAYER {

@@ -49,12 +49,11 @@ uint8_t machine_IN(uint8_t port, Ports* portsState) {
 	switch (port)
 	{
 	case 0:
+		return 1;
 	case 1:
-		return 1; // TODO: check why it is like that
+		return portsState->iPorts[port];
 	case 2:
 		return 0;
-		//return portsState->iPorts[port];
-		//break;
 	case 3: {
 		uint16_t shiftedValueResult = portsState->shiftValue << portsState->shiftOffset;
 		shiftedValueResult = (shiftedValueResult >> 8) & 0xff;
@@ -81,9 +80,11 @@ static uint8_t keyToBit(KEY key, PLAYER player) {
 	if (key == START) {
 		return player == PLAYER2 ? 0x2 : 0x4;
 	}
+	if (key == COIN) return 0x1;
 	if (key == TILT) return 0x4;
 	if (key == SHOOT) return 0x10;
 	if (key == LEFT) return 0x20;
+
 	return 0x40; // RIGHT
 }
 
