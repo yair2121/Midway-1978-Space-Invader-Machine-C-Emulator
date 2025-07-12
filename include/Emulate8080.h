@@ -10,13 +10,15 @@ typedef enum REGISTER_PAIR {
 	HL = 2,
 } REGISTER_PAIR;
 
-typedef struct ConditionCodes {
+typedef struct ConditionCodes { // TODO: understand this padding better
+	uint8_t    cy : 1;
+	uint8_t    pad1 : 1;
+	uint8_t    p : 1;
+	uint8_t    pad2 : 2;
+	uint8_t    ac : 1;
+	uint8_t    pad3 : 3;
 	uint8_t    z : 1;
 	uint8_t    s : 1;
-	uint8_t    p : 1;
-	uint8_t    cy : 1;
-	uint8_t    ac : 1;
-	uint8_t    pad : 3;
 } ConditionCodes;
 
 typedef struct State8080 {
@@ -31,14 +33,14 @@ typedef struct State8080 {
 	uint16_t pc;
 	uint8_t* memory;
 	struct ConditionCodes cc;
-	uint8_t     interrupt_enable;
+	bool     interrupt_enable;
 } State8080;
 
 
 /// <summary>
 /// Read port value from the current machine into the 8080 cpu.
 /// </summary>
-typedef uint8_t *readPortFunc (uint8_t port, void* context);
+typedef uint8_t readPortFunc (uint8_t port, void* context);
 
 /// <summary>
 /// Write a value to given port on 8080 cpu to current machine.

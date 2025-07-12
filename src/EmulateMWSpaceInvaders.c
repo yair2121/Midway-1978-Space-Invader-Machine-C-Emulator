@@ -21,8 +21,12 @@ MWState* init_mw_state(Cpu8080* cpu) {
 	return mwState;
 }
 
-void machine_OUT(uint8_t port, uint8_t value, Ports* portsState) {
+uint8_t* get_frame_buffer(Cpu8080* cpu)
+{
+	return cpu->state->memory + 0x2400;
+}
 
+void machine_OUT(uint8_t port, uint8_t value, Ports* portsState) {
 	switch (port)
 	{
 	case 2: {
@@ -41,7 +45,12 @@ void machine_OUT(uint8_t port, uint8_t value, Ports* portsState) {
 		portsState->oPorts5 = value;
 		break;
 	}
-		// TODO: Crash in this case
+	case 6: {
+		break;
+	}
+	default: {
+		  break; // TODO: Crash in this case
+	}
 	}
 }
 
@@ -49,20 +58,17 @@ uint8_t machine_IN(uint8_t port, Ports* portsState) {
 	switch (port)
 	{
 	case 0:
-		return 1;
+		return 0xf;
 	case 1:
-		return portsState->iPorts[port];
+		return portsState->iPorts[1];
 	case 2:
 		return 0;
 	case 3: {
-		uint16_t shiftedValueResult = portsState->shiftValue << portsState->shiftOffset;
-		shiftedValueResult = (shiftedValueResult >> 8) & 0xff;
-		return (uint8_t) shiftedValueResult;
+		return portsState->shiftValue >> (8 - portsState->shiftOffset);
 	}
 	default: {
 		return 0; // TODO: Crash in this case
 	}
-
 	}
 }
 

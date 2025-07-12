@@ -24,6 +24,6 @@ DisplayParams* init_display_params(int width, int height, SDL_Color pixelColor);
 /// <param name="buffer">Video memory start point (which is mapped to 0x2400)</param>
 void fillScreen(DisplayParams* displayParams, uint8_t* buffer);
 
+void clearRenderer(DisplayParams* displayParams);
 void reRenderScreen(DisplayParams* displayParams);
-
 void free_display_params(DisplayParams* displayParams);

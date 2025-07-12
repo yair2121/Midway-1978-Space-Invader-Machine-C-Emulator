@@ -10,6 +10,7 @@ typedef enum KEY {
 	START = 3,
 	TILT = 4,
 	COIN = 5,
+	KEY_COUNT
 } KEY;
 
 typedef enum PLAYER {
@@ -36,6 +37,8 @@ typedef struct MWState {
 
 
 MWState* init_mw_state(Cpu8080* cpu);
+
+int8_t* get_frame_buffer(Cpu8080* cpu);
 
 void machine_OUT(uint8_t port, uint8_t value, Ports* portsState);
 

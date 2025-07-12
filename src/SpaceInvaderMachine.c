@@ -30,7 +30,6 @@ void run_CPU(MachineState* machineState, uint64_t lastRunTime, uint64_t currentR
 		uint8_t opcode = get_next_opcode(machineState->cpu->state);
 		cyclesRan += opcode_to_cycles(opcode);
 		emulate_8080_op(machineState->cpu);
-
 	}
 }
 
