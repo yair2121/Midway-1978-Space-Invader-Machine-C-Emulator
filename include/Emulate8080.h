@@ -3,36 +3,51 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <string.h>
+#include <stdio.h>
 
-typedef enum REGISTER_PAIR {
-	BC,
-	DE = 1,
-	HL = 2,
-} REGISTER_PAIR;
+typedef enum GENERAL_REGISTER {
+	B = 0,
+	C,
+	D,
+	E,
+	H,
+	L,
+	HL_GENERAL_REGISTER, // Duplicated because many opcodes works with both HL pair and the rest of general registers (MOV, ADD, etc.)
+	A,
+	NUMBER_OF_OPCODE_REGISTERS,
+} GENERAL_REGISTER;
 
-typedef struct ConditionCodes { // TODO: understand this padding better
-	uint8_t    cy : 1;
-	uint8_t    pad1 : 1;
-	uint8_t    p : 1;
-	uint8_t    pad2 : 2;
-	uint8_t    ac : 1;
-	uint8_t    pad3 : 3;
-	uint8_t    z : 1;
-	uint8_t    s : 1;
-} ConditionCodes;
+typedef enum SPECIAL_REGISTER {
+	BC = 0,
+	DE,
+	HL,
+	NUMBER_OF_REGISTER_PAIRS,
+	// SP and PSW always appears after the pairs in the opcode layout
+	SP = NUMBER_OF_REGISTER_PAIRS,
+	PSW = NUMBER_OF_REGISTER_PAIRS,
+	PC
+} SPECIAL_REGISTER;
+
+
+typedef enum CONDITION_CODE {
+	CARRY = 0,
+	PAD1,
+	PARITY,
+	PAD2,
+	AC,
+	PAD3,
+	ZERO,
+	SIGN,
+	NUMBER_OF_CONDITION_CODES,
+} CONDITION_CODE;
 
 typedef struct State8080 {
-	uint8_t a;
-	uint8_t b;
-	uint8_t c;
-	uint8_t d;
-	uint8_t e;
-	uint8_t h;
-	uint8_t l;
+	uint8_t general_register[NUMBER_OF_OPCODE_REGISTERS]; // Leaving index 6 (HL) unused to reuse same enum for both general registers and opcode registers.
 	uint16_t sp;
 	uint16_t pc;
 	uint8_t* memory;
-	struct ConditionCodes cc;
+	bool cc[NUMBER_OF_CONDITION_CODES];
+	//struct ConditionCodes cc;
 	bool     interrupt_enable;
 } State8080;
 
@@ -100,3 +115,22 @@ Cpu8080* init_cpu_state(size_t bufferSize, uint8_t* codeBuffer, size_t memorySiz
 void set_in_out_ports(Cpu8080* cpu, InTask inTask, OutTask outTask);
 
 void free_cpu(Cpu8080* state);
+
+void write_to_register_pair_address(State8080* state, SPECIAL_REGISTER register_pair, uint8_t value);
+uint8_t read_from_register_pair_address(State8080* state, SPECIAL_REGISTER register_pair);
+void set_flagsZSP(State8080* state, uint8_t value);
+void set_flags(State8080* state, uint16_t value);
+uint16_t get_register_pair(State8080* state, SPECIAL_REGISTER register_pair);
+void set_register_pair(State8080* state, SPECIAL_REGISTER register_pair, uint16_t value);
+uint16_t bytes_to_word(uint16_t low, uint16_t high);
+void write_to_memory(State8080* state, uint16_t offset, uint8_t value);
+uint8_t read_from_memory(State8080* state, uint16_t offset);
+uint8_t pop_byte(State8080* state);
+void push(State8080* state, uint8_t low, uint8_t high);
+bool parity(int value, int size);
+void byte_to_flags(State8080* state, uint8_t flags);
+uint8_t flags_to_byte(State8080* state);
+
+
+/// <summary>/// /// </summary>/// <param name="special_register"></param>/// <returns>Whether the given special_register is BC/DE/HL</returns>
+bool is_pair(SPECIAL_REGISTER special_register);
