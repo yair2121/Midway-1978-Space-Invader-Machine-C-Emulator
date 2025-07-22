@@ -46,3 +46,4 @@ uint8_t machine_IN(uint8_t port, Ports* portsState);
 
 void machine_key_down(KEY key, PLAYER player, Ports* portsState);
 void machine_key_up(KEY key, PLAYER player, Ports* portsState);
+
