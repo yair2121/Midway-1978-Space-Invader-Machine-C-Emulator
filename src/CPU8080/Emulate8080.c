@@ -1,5 +1,5 @@
+
 #include "Emulate8080.h"
-#include "Disassembler8080.h"
 #include "Opcodes8080.h"
 
 bool is_pair(SPECIAL_REGISTER special_register) {
@@ -75,24 +75,19 @@ void write_to_memory(State8080* state, uint16_t offset, uint8_t value) {
 	if (offset < 0x2000) {
 		printf("Error: Writing to ROM at %04x\n", offset);
 		//exit(EXIT_FAILURE);
-		return;
+		//return;
 	}
 	else if (offset >= 0x4000) {
 		printf("Error: Writing outside of RAM at %04x\n", offset);
 		//exit(EXIT_FAILURE);
-		return;
+		//return;
 	}
 
 	state->memory[offset] = value;
 }
 
 uint8_t read_from_memory(State8080* state, uint16_t offset) {
-	if (offset == 0x2061 && state->memory[offset] != 0) {
-		//printf("\nCOLLISION\n");
-	}
-	if (offset == 0x2003) {
-		//printf("%d\n", state->memory[offset]);
-	}
+
 	return state->memory[offset];
 }
 
@@ -149,7 +144,7 @@ void set_flags(State8080* state, uint16_t value) {
 	set_flagsZSP(state, value & 0xff);
 }
 
-void RST_opcode(State8080* state, uint8_t N) {
+void op_rst(State8080* state, uint8_t N) {
 	uint8_t high = ((state->pc >> 8) & 0xff);
 	uint8_t low = state->pc & 0xff;
 	push(state, low, high);
@@ -219,7 +214,7 @@ uint8_t get_next_opcode(State8080* state) {
 }
 
 void generate_interrupt(State8080* state, int interrupt_num) {
-	RST_opcode(state, interrupt_num);
+	op_rst(state, interrupt_num);
 	state->interrupt_enable = false;
 }
 

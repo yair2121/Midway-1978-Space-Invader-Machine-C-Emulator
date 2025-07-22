@@ -7,6 +7,7 @@
 
 #include "Emulate8080.h"
 
+
 typedef bool (*should_handle) (uint8_t opcode);
 typedef void (*handle_opcode) (Cpu8080* cpu, State8080* state, uint8_t* opcode);
 typedef struct {
@@ -195,8 +196,8 @@ typedef enum CONDITION_TYPE {
 	NO_CONDITION,
 } CONDITION_TYPE;
 
-const OpcodeHandler handlers[];
-const int handlers_size;
+extern const OpcodeHandler handlers[];
+extern const int handlers_size;
 
 #define SINGLE_VALUE_SHOULD_HANDLE(VALUE) bool is_value_##VALUE(uint8_t opcode) { return opcode == VALUE;}
 #define RANGE_VALUE_SHOULD_HANDLE(MIN, MAX) bool is_between_##MIN##_##MAX(uint8_t opcode) { return opcode >= MIN && opcode <= MAX;}
@@ -211,6 +212,71 @@ const int handlers_size;
         return false;                                                    \
     }
 
+/// <summary>
+/// This is the handler format for ADD, ADC, SUB, SBB, ANA, XRA, ORA, CMP opcodes.
+/// </summary>
+#define HANDLE_SINGLE_TARGET_OPCODES(OP_NAME, OP_METHOD, OP_START, OP_IMMIDIATE)                          \
+    void handle_##OP_NAME(Cpu8080 *cpu, State8080 *state, uint8_t *opcode) {                              \
+        uint16_t value_to_##OP_NAME = get_single_target_value(state, opcode, OP_START, OP_IMMIDIATE);                 \
+		if(*opcode == OP_IMMIDIATE) state->pc++;																			\
+        OP_METHOD(state, value_to_##OP_NAME);              \
+    }
+
+#define DECLARE_SINGLE_TARGET_HANDLER(OP_NAME) \
+    void handle_##OP_NAME(Cpu8080* cpu, State8080* state, uint8_t* opcode);
 
 
 
+void handle_mov(Cpu8080* cpu, State8080* state, uint8_t* opcode);
+DECLARE_SINGLE_TARGET_HANDLER(ADD);
+DECLARE_SINGLE_TARGET_HANDLER(ADC);
+DECLARE_SINGLE_TARGET_HANDLER(SUB_IMMEDIATE);	
+DECLARE_SINGLE_TARGET_HANDLER(SUB);
+DECLARE_SINGLE_TARGET_HANDLER(SBB);
+DECLARE_SINGLE_TARGET_HANDLER(ANA);
+DECLARE_SINGLE_TARGET_HANDLER(XRA);
+
+
+
+DECLARE_SINGLE_TARGET_HANDLER(ORA);
+DECLARE_SINGLE_TARGET_HANDLER(CMP);
+
+
+
+void handle_cmp(Cpu8080* cpu, State8080* state, uint8_t* opcode);
+void handle_lxi(Cpu8080* cpu, State8080* state, uint8_t* opcode);
+void handle_stax(Cpu8080* cpu, State8080* state, uint8_t* opcode);
+void handle_jmp(Cpu8080* cpu, State8080* state, uint8_t* opcode);
+void handle_ret(Cpu8080* cpu, State8080* state, uint8_t* opcode);
+void handle_call(Cpu8080* cpu, State8080* state, uint8_t* opcode);
+void handle_op_inr(Cpu8080* cpu, State8080* state, uint8_t* opcode);
+void handle_op_inx(Cpu8080* cpu, State8080* state, uint8_t* opcode);
+void handle_sta(Cpu8080* cpu, State8080* state, uint8_t* opcode);
+void handle_dcr(Cpu8080* cpu, State8080* state, uint8_t* opcode);
+void handle_daa(Cpu8080* cpu, State8080* state, uint8_t* opcode);
+void handle_di_ei(Cpu8080* cpu, State8080* state, uint8_t* opcode);
+void handle_pchl(Cpu8080* cpu, State8080* state, uint8_t* opcode);
+void handle_mvi(Cpu8080* cpu, State8080* state, uint8_t* opcode);
+void handle_dad(Cpu8080* cpu, State8080* state, uint8_t* opcode);
+void handle_stc(Cpu8080* cpu, State8080* state, uint8_t* opcode);
+void handle_cmc(Cpu8080* cpu, State8080* state, uint8_t* opcode);
+void handle_dcx(Cpu8080* cpu, State8080* state, uint8_t* opcode);
+void handle_ldax(Cpu8080* cpu, State8080* state, uint8_t* opcode);
+void handle_push(Cpu8080* cpu, State8080* state, uint8_t* opcode);
+void handle_pop(Cpu8080* cpu, State8080* state, uint8_t* opcode);
+void handle_rst(Cpu8080* cpu, State8080* state, uint8_t* opcode);
+void handle_lda(Cpu8080* cpu, State8080* state, uint8_t* opcode);
+void handle_rlc(Cpu8080* cpu, State8080* state, uint8_t* opcode);
+void handle_rrc(Cpu8080* cpu, State8080* state, uint8_t* opcode);
+void handle_ral(Cpu8080* cpu, State8080* state, uint8_t* opcode);
+void handle_rar(Cpu8080* cpu, State8080* state, uint8_t* opcode);
+void handle_sphl(Cpu8080* cpu, State8080* state, uint8_t* opcode);
+void handle_xchg(Cpu8080* cpu, State8080* state, uint8_t* opcode);
+void handle_xthl(Cpu8080* cpu, State8080* state, uint8_t* opcode);
+void handle_cma(Cpu8080* cpu, State8080* state, uint8_t* opcode);
+void handle_shld(Cpu8080* cpu, State8080* state, uint8_t* opcode);
+void handle_lhld(Cpu8080* cpu, State8080* state, uint8_t* opcode);
+
+
+void handle_in(Cpu8080* cpu, State8080* state, uint8_t* opcode);
+void handle_out(Cpu8080* cpu, State8080* state, uint8_t* opcode);
