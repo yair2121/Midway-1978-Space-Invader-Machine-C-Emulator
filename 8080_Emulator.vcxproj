@@ -24,6 +24,7 @@
     <ProjectGuid>{b7fe9512-aadf-43e0-b92a-93257bc10aad}</ProjectGuid>
     <RootNamespace>My8080Emulator</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+    <ProjectName>SpaceInvaderEmulator</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -76,7 +77,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>D:\Emulator_Development\SDL-main\include; $(ProjectDir)include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>D:\Emulator_Development\SDL-main\include;D:\Emulator_Development\8080_Emulator\include\SpaceInvaders_machine;D:\Emulator_Development\8080_Emulator\include\CPU8080</AdditionalIncludeDirectories>
       <InlineFunctionExpansion>Disabled</InlineFunctionExpansion>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
     </ClCompile>
@@ -93,7 +94,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>D:\Emulator_Development\SDL-main\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>D:\Emulator_Development\SDL-main\include;D:\Emulator_Development\8080_Emulator\include\SpaceInvaders_machine;D:\Emulator_Development\8080_Emulator\include\CPU8080</AdditionalIncludeDirectories>
       <InlineFunctionExpansion>Disabled</InlineFunctionExpansion>
     </ClCompile>
     <Link>
@@ -109,7 +110,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>TEST_MODE;_DEBUG;_CONSOLE;%(PreprocessorDefinitions);</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>D:\Emulator_Development\SDL-main\include; $(ProjectDir)include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>D:\Emulator_Development\SDL-main\include;D:\Emulator_Development\8080_Emulator\include\SpaceInvaders_machine;D:\Emulator_Development\8080_Emulator\include\CPU8080</AdditionalIncludeDirectories>
       <InlineFunctionExpansion>Disabled</InlineFunctionExpansion>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
     </ClCompile>
@@ -126,7 +127,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>D:\Emulator_Development\SDL-main\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>D:\Emulator_Development\SDL-main\include;D:\Emulator_Development\8080_Emulator\include\SpaceInvaders_machine;D:\Emulator_Development\8080_Emulator\include\CPU8080</AdditionalIncludeDirectories>
       <InlineFunctionExpansion>Disabled</InlineFunctionExpansion>
     </ClCompile>
     <Link>
@@ -137,27 +138,27 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="src\Disassembler8080.c" />
-    <ClCompile Include="src\Emulate8080.c" />
-    <ClCompile Include="src\EmulateMWSpaceInvaders.c" />
-    <ClCompile Include="src\main.c" />
-    <ClCompile Include="src\MWDisplay.c" />
-    <ClCompile Include="src\SpaceInvaderMachine.c" />
+    <ClCompile Include="roy_c.c" />
+    <ClCompile Include="src\main.c">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="src\SpaceInvaders_machine\EmulateMWSpaceInvaders.c" />
+    <ClCompile Include="src\SpaceInvaders_machine\MWDisplay.c" />
+    <ClCompile Include="src\SpaceInvaders_machine\SpaceInvaderMachine.c" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="include\Disassembler8080.h" />
-    <ClInclude Include="include\Emulate8080.h" />
-    <ClInclude Include="include\EmulateMWSpaceInvaders.h" />
-    <ClInclude Include="include\MWDisplay.h" />
-    <ClInclude Include="include\SpaceInvaderMachine.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <ResourceCompile Include="8080_Emulator.rc" />
-  </ItemGroup>
-  <ItemGroup>
+    <ProjectReference Include="..\CPU8080Emulator\CPU8080Emulator.vcxproj">
+      <Project>{3474fe9a-699b-40e0-908d-2d817a9bff8d}</Project>
+    </ProjectReference>
     <ProjectReference Include="..\SDL-main\VisualC\SDL\SDL.vcxproj">
       <Project>{81ce8daf-ebb2-4761-8e45-b71abcca8c68}</Project>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="include\SpaceInvaders_machine\EmulateMWSpaceInvaders.h" />
+    <ClInclude Include="include\SpaceInvaders_machine\MWDisplay.h" />
+    <ClInclude Include="include\SpaceInvaders_machine\SpaceInvaderMachine.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
