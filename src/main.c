@@ -169,11 +169,11 @@ int main(int argc, char** argv) {
 	game_rom.size = fread(game_rom.code_buffer, 1, fileSize, code_fp); // TODO: Validate that return value equal fileSize
 	fclose(code_fp);
 
-	char* path = "C:\\Users\\yairy\\Downloads\\invaders\\";
+	char* sound_directory = argv[2];
 	const char sound_effect_paths[NUMBER_OF_SOUND_EFFECTS][0x100];
 
 	for (int i = 0; i < 9; i++) {
-		sprintf_s(sound_effect_paths[i], sizeof(sound_effect_paths[i]), "%s%d.wav", path, i);
+		sprintf_s(sound_effect_paths[i], sizeof(sound_effect_paths[i]), "%s%d.wav", sound_directory, i);
 	}
 	SDL_CONTEXT sdl_context;
 	init_sound_effects(&sdl_context.sound_effects, sound_effect_paths);
