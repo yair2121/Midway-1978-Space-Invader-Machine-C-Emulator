@@ -59,36 +59,36 @@ typedef struct State8080
 /// <summary>
 /// Read port value from the current machine into the 8080 cpu.
 /// </summary>
-typedef uint8_t readPortFunc(uint8_t port, void *context);
+typedef uint8_t read_port_func(uint8_t port, void *context);
 
 /// <summary>
 /// Write a value to given port on 8080 cpu to current machine.
 /// </summary>
-typedef void writePortFunc(uint8_t port, uint8_t value, void *context);
+typedef void write_port_func(uint8_t port, uint8_t value, void *context);
 
 /// <summary>
-/// Holds both the readPort function, and the machine context required for it to actually read the port.
+/// Holds both the read_port function, and the machine context required for it to actually read the port.
 /// </summary>
 typedef struct
 {
-	readPortFunc *readPort;
+	read_port_func *read_port;
 	void *context;
 } InTask;
 
 /// <summary>
-/// Holds both the writePort function, and the machine context required for it to actually write to the port.
+/// Holds both the write_port function, and the machine context required for it to actually write to the port.
 /// </summary>
 typedef struct
 {
-	writePortFunc *writePort;
+	write_port_func *write_port;
 	void *context;
 } OutTask;
 
 typedef struct Cpu8080
 {
 	State8080 *state;
-	InTask inTask;
-	OutTask outTask;
+	InTask in_task;
+	OutTask out_task;
 } Cpu8080;
 
 uint8_t get_next_opcode(State8080 *state);
@@ -108,15 +108,15 @@ int emulate_8080_op(Cpu8080 *cpu);
 int opcode_to_cycles(uint8_t opcode);
 
 void generate_interrupt(State8080 *state, int interrupt_num);
-Cpu8080 *init_cpu_state(size_t bufferSize, uint8_t *codeBuffer, size_t memorySize);
+Cpu8080 *init_cpu_state(size_t buffer_size, uint8_t *code_buffer, size_t memory_size);
 
 /// <summary>
 /// Set the communication between the cpu and its machine through the IO ports.
 /// </summary>
 /// <param name="cpu"></param>
-/// <param name="inTask"></param>
-/// <param name="outTask"></param>
-void set_in_out_ports(Cpu8080 *cpu, InTask inTask, OutTask outTask);
+/// <param name="in_task"></param>
+/// <param name="out_task"></param>
+void set_in_out_ports(Cpu8080 *cpu, InTask in_task, OutTask out_task);
 
 void free_cpu(Cpu8080 *state);
 
@@ -138,3 +138,6 @@ uint8_t flags_to_byte(State8080 *state);
 void op_rst(State8080* state, uint8_t N);
 /// <summary>/// /// </summary>/// <param name="special_register"></param>/// <returns>Whether the given special_register is BC/DE/HL</returns>
 bool is_pair(SPECIAL_REGISTER special_register);
+
+
+void run_CPU(Cpu8080* cpu, uint64_t real_time_to_run, uint64_t speedScaling);

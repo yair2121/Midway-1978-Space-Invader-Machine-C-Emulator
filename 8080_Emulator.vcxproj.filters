@@ -14,32 +14,4 @@
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
   </ItemGroup>
-  <ItemGroup>
-    <ClCompile Include="src\main.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="roy_c.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\SpaceInvaders_machine\EmulateMWSpaceInvaders.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\SpaceInvaders_machine\MWDisplay.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\SpaceInvaders_machine\SpaceInvaderMachine.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="include\SpaceInvaders_machine\EmulateMWSpaceInvaders.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\SpaceInvaders_machine\MWDisplay.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\SpaceInvaders_machine\SpaceInvaderMachine.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-  </ItemGroup>
 </Project>

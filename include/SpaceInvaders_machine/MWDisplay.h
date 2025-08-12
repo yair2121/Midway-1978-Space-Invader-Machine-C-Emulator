@@ -1,41 +1,69 @@
 #pragma once
+
 #include <SDL3/SDL.h>
 #include "Emulate8080.h"
-typedef struct ScreenParams {
-	int width;
-	int height;
-	SDL_Color pixelColor;
-} ScreenParams;
 
-typedef struct DisplayParams {
-	ScreenParams* screenParams;
-	SDL_Renderer* renderer;
-	SDL_Window* window;
-} DisplayParams;
+#define FRAME_WIDTH 224
+#define FRAME_HEIGHT 256
+#define SPACE_INVADERS_ASPECT_RATIO ((float)FRAME_WIDTH / (float)FRAME_HEIGHT)
+#define FRAME_BUFFER_SIZE ((FRAME_WIDTH * FRAME_HEIGHT) / 8)
 
-
-typedef enum COLOR_FILTER
-{
-	WHITE = 0,
-	BLACK,
+typedef enum COLOR_FILTER {
+	BLACK = 0,
+	WHITE,
 	RED,
 	GREEN,
+	NUMBER_OF_COLORS,
 } COLOR_FILTER;
 
+typedef struct ScreenPosition {
+	uint8_t x; // X coordinate (0-255)
+	uint8_t y; // Y coordinate (0-223)
+} ScreenPosition;
 
-DisplayParams* init_display_params(int width, int height, SDL_Color pixelColor);
+typedef struct Color_Screen_Boundaries {
+	COLOR_FILTER color; // Color of the screen area
+	ScreenPosition start_left; // X coordinate (0-255)
+	ScreenPosition start_right; // Y coordinate (0-223)
+} Color_Screen_Boundaries;
+
+#define NUM_COLOR_REGIONS 7
+/// <summary>
+/// Screen boundaries for each color region.
+/// </summary>
+extern const Color_Screen_Boundaries color_regions[NUM_COLOR_REGIONS];
+
+
+
+typedef void (*render_frame) (COLOR_FILTER frame[FRAME_HEIGHT][FRAME_WIDTH], void* context);
+typedef void (*free_renderer) (void* context);
+//typedef void* (*init_renderer) (void* context);
 
 /// <summary>
-/// Draws the screen using the given buffer.
+/// Functions to initialize, render, and free the display renderer.
 /// </summary>
-/// <param name="displayParams"></param>
-/// <param name="buffer">Video memory start point (which is mapped to 0x2400)</param>
-void fillScreen(DisplayParams* displayParams, uint8_t* buffer);
+typedef struct DisplayFunctions {
+	//init_renderer init_renderer_func;
+	render_frame render_frame_func;
+	free_renderer free_renderer_func;
+} DisplayFunctions;
 
-void clearRenderer(DisplayParams* displayParams);
-void reRenderScreen(DisplayParams* displayParams);
-void free_display_params(DisplayParams* displayParams);
+void get_frame(uint8_t frameBufferFromMemory[FRAME_BUFFER_SIZE], uint8_t resultBuffer[FRAME_HEIGHT][FRAME_WIDTH]);
+
+/// <summary>
+/// Convert binary frame (1s pixel on screen, 0s pixel off) to colored frame.
+/// </summary>
+/// <param name="frame"></param>
+/// <param name="resultColoredFrame"></param>
+void apply_color_filter(uint8_t frame[FRAME_HEIGHT][FRAME_WIDTH], COLOR_FILTER resultColoredFrame[FRAME_HEIGHT][FRAME_WIDTH]);
 
 
-void getFrame(uint8_t* frameBufferFromMemory, uint8_t** resultBuffer);
-void applyColorFilter(uint8_t** frame, COLOR_FILTER** resultColoredFrame);
+/// <summary>
+/// Convert Game frame buffer to colored frame buffer (Based on Space Invader Arcade machine filter).
+/// </summary>
+/// <param name="frameBufferFromMemory"></param>
+/// <param name="resultBuffer"></param>
+void get_colored_frame(uint8_t frameBufferFromMemory[FRAME_BUFFER_SIZE], COLOR_FILTER resultBuffer[FRAME_HEIGHT][FRAME_WIDTH]);
+
+
+

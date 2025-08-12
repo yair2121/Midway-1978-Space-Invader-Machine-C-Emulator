@@ -138,27 +138,12 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="roy_c.c" />
-    <ClCompile Include="src\main.c">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="src\SpaceInvaders_machine\EmulateMWSpaceInvaders.c" />
-    <ClCompile Include="src\SpaceInvaders_machine\MWDisplay.c" />
-    <ClCompile Include="src\SpaceInvaders_machine\SpaceInvaderMachine.c" />
-  </ItemGroup>
-  <ItemGroup>
     <ProjectReference Include="..\CPU8080Emulator\CPU8080Emulator.vcxproj">
       <Project>{3474fe9a-699b-40e0-908d-2d817a9bff8d}</Project>
     </ProjectReference>
     <ProjectReference Include="..\SDL-main\VisualC\SDL\SDL.vcxproj">
       <Project>{81ce8daf-ebb2-4761-8e45-b71abcca8c68}</Project>
     </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="include\SpaceInvaders_machine\EmulateMWSpaceInvaders.h" />
-    <ClInclude Include="include\SpaceInvaders_machine\MWDisplay.h" />
-    <ClInclude Include="include\SpaceInvaders_machine\SpaceInvaderMachine.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

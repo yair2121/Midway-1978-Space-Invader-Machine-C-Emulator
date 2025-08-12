@@ -5,12 +5,12 @@
 /// <summary>
 /// Print the next Opcode. 
 /// </summary>
-/// <param name="codebuffer">Valid pointer to 8080 assembly code</param>
+/// <param name="code_buffer">Valid pointer to 8080 assembly code</param>
 /// <param name="pc">Current offset into the code</param>
 /// <returns>Size of op in bytes</returns>
-int disassemble_8080_op(unsigned char* codebuffer, int pc)
+int disassemble_8080_op(unsigned char* code_buffer, int pc)
 {
-	unsigned char* code = &codebuffer[pc];
+	unsigned char* code = &code_buffer[pc];
 	int opbytes = 1;
 	printf("%04x ", pc);
 	switch (*code)
@@ -306,9 +306,9 @@ int disassemble_8080_op(unsigned char* codebuffer, int pc)
 }
 
 
-void disassemble_code(size_t size, unsigned char* codebuffer) {
+void disassemble_code(size_t size, unsigned char* code_buffer) {
 
 	for (int pc = 0; pc < size;) {
-		pc += disassemble_8080_op(codebuffer, pc); // TODO: return the code instead of printing it.
+		pc += disassemble_8080_op(code_buffer, pc); // TODO: return the code instead of printing it.
 	}
 }

@@ -4,15 +4,14 @@
 #include <inttypes.h>
 #include <stdbool.h>
 
-
 #include "Emulate8080.h"
 
 
-typedef bool (*should_handle) (uint8_t opcode);
+typedef bool (*should_handle_func) (uint8_t opcode);
 typedef void (*handle_opcode) (Cpu8080* cpu, State8080* state, uint8_t* opcode);
 typedef struct {
-	const should_handle shouldHandle;
-	const handle_opcode handle;
+	const should_handle_func should_handle_func;
+	const handle_opcode handle_func;
 } OpcodeHandler;
 
 

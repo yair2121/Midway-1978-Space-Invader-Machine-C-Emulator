@@ -26,7 +26,7 @@ Cpu8080* init_cpu_state(size_t bufferSize, uint8_t* codeBuffer, size_t memorySiz
 	}
 	memcpy_s(cpu->state->memory, memorySize, codeBuffer, bufferSize);
 	//cpu->state->interrupt_enable = true; // TODO: ????
-	cpu->state->sp = 0x2400;
+	
 	return cpu;
 }
 uint16_t get_register_pair(State8080* state, SPECIAL_REGISTER register_pair) {
@@ -168,17 +168,15 @@ static void unimplemented_instruction(State8080* state)
 	exit(EXIT_FAILURE);
 }
 
-void set_in_out_ports(Cpu8080* cpu, InTask inTask, OutTask outTask)
+void set_in_out_ports(Cpu8080* cpu, InTask in_task, OutTask out_task)
 {
-	cpu->inTask = inTask;
-	cpu->outTask = outTask;
+	cpu->in_task = in_task;
+	cpu->out_task = out_task;
 }
 
 void free_cpu(Cpu8080* cpu) {
 	free(cpu->state->memory);
 	free(cpu->state);
-	//free(cpu->inTask);
-	//free(cpu->outTask);
 	free(cpu);
 }
 
@@ -248,12 +246,23 @@ int emulate_8080_op(Cpu8080* cpu) {
 	state->pc += 1;
 	for (int handler_index = 0; handler_index < handlers_size; handler_index++)
 	{
-		if (handlers[handler_index].shouldHandle(*opcode)) {
-			handlers[handler_index].handle(cpu, state, opcode);
+		if (handlers[handler_index].should_handle_func(*opcode)) {
+			handlers[handler_index].handle_func(cpu, state, opcode);
 			return opcode_to_cycles(*opcode);
 		}
 	}
 	state->pc--;
 	unimplemented_instruction(state);
+
 	return 0;
 } 
+
+void run_CPU(Cpu8080* cpu, uint64_t realTimeToRun, uint64_t speedScaling) {
+	uint64_t cyclesToRun = realTimeToRun * 2 * speedScaling; // 2Mhz
+	for (int cyclesRan = 0; cyclesRan < cyclesToRun;)
+	{
+		uint8_t opcode = get_next_opcode(cpu->state);
+		emulate_8080_op(cpu);
+		cyclesRan += opcode_to_cycles(opcode);
+	}
+}

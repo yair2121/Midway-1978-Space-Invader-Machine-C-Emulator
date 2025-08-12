@@ -393,26 +393,27 @@ void handle_daa(Cpu8080 *cpu, State8080 *state, uint8_t *opcode)
 
 static void op_in(Cpu8080 *cpu, State8080 *state, uint8_t port)
 {
-	uint8_t value = cpu->inTask.readPort(port, cpu->inTask.context);
+	uint8_t value = cpu->in_task.read_port(port, cpu->in_task.context);
 	state->general_register[A] = value;
-	state->pc++;
 }
 
 SINGLE_VALUE_SHOULD_HANDLE(IN);
 void handle_in(Cpu8080 *cpu, State8080 *state, uint8_t *opcode)
 {
 	op_in(cpu, state, opcode[1]);
+	state->pc++;
+
 }
 
 static void op_out(Cpu8080 *cpu, State8080 *state, uint8_t port)
 {
-	cpu->outTask.writePort(port, state->general_register[A], cpu->outTask.context);
-	state->pc++;
+	cpu->out_task.write_port(port, state->general_register[A], cpu->out_task.context);
 }
 SINGLE_VALUE_SHOULD_HANDLE(OUT);
 void handle_out(Cpu8080 *cpu, State8080 *state, uint8_t *opcode)
 {
 	op_out(cpu, state, opcode[1]);
+	state->pc++;
 }
 
 DISCRETE_VALUE_SHOULD_HANDLE(DI_EI, DI, EI); // Disable and Enable Interrupts
