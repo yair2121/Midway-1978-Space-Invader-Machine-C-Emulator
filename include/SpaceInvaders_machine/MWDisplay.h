@@ -31,7 +31,7 @@ typedef struct Color_Screen_Boundaries {
 /// <summary>
 /// Screen boundaries for each color region.
 /// </summary>
-extern const Color_Screen_Boundaries color_regions[NUM_COLOR_REGIONS];
+extern const Color_Screen_Boundaries COLOR_REGIONS[NUM_COLOR_REGIONS];
 
 void get_frame(uint8_t frameBufferFromMemory[FRAME_BUFFER_SIZE], uint8_t resultBuffer[FRAME_HEIGHT][FRAME_WIDTH]);
 

@@ -3,16 +3,16 @@
 
 #include <stdbool.h>
 #include <EmulateMWSpaceInvaders.h>
-static void fill_sound_effects(bool sound_effects[NUMBER_OF_SOUND_EFFECTS], PortsState portsState) {
+static void fill_sound_effects(bool sound_effects[NUMBER_OF_SOUND_EFFECTS], PortsState ports_state) {
 	for (SOUND_EFFECT_INVADERS sound_effect = UFO; sound_effect < NUMBER_OF_SOUND_EFFECTS; sound_effect++) {
 		uint8_t* port;
 		int sound_effect_bit = sound_effect;
 		if (sound_effect < NUMBER_OF_SOUND_EFFECTS_PORT_3)
 		{
-			port = &portsState.sound_bits_1;
+			port = &ports_state.sound_bits_1;
 		}
 		else {
-			port = &portsState.sound_bits_2;
+			port = &ports_state.sound_bits_2;
 			sound_effect_bit -= NUMBER_OF_SOUND_EFFECTS_PORT_3; // Adjust index for port 5 sound effects
 		}
 		sound_effects[sound_effect] = (bool)((*port >> sound_effect_bit) & 1);

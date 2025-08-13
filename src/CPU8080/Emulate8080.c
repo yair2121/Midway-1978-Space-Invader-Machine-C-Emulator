@@ -6,7 +6,7 @@ bool is_pair(SPECIAL_REGISTER special_register) {
 	return special_register < NUMBER_OF_REGISTER_PAIRS;
 }
 
-Cpu8080* init_cpu_state(size_t bufferSize, uint8_t* codeBuffer, size_t memorySize) {
+Cpu8080* init_cpu_state(size_t buffer_size, uint8_t* code_buffer, size_t memory_size) {
 	Cpu8080* cpu = (Cpu8080*)calloc(1, sizeof(Cpu8080));
 	if (cpu == NULL) {
 		return NULL;
@@ -18,13 +18,13 @@ Cpu8080* init_cpu_state(size_t bufferSize, uint8_t* codeBuffer, size_t memorySiz
 		return NULL;
 	}
 
-	cpu->state->memory = (uint8_t*)calloc(memorySize, sizeof(uint8_t));
+	cpu->state->memory = (uint8_t*)calloc(memory_size, sizeof(uint8_t));
 	if (cpu->state->memory == NULL) {
 		free(cpu->state);
 		free(cpu);
 		return NULL;
 	}
-	memcpy_s(cpu->state->memory, memorySize, codeBuffer, bufferSize);	
+	memcpy_s(cpu->state->memory, memory_size, code_buffer, buffer_size);	
 	return cpu;
 }
 uint16_t get_register_pair(State8080* state, SPECIAL_REGISTER register_pair) {
@@ -110,6 +110,7 @@ bool parity(int value, int size) {
 	}
 	return (activeBitCount % 2) == 0;
 }
+
 /// <summary>
 /// Parse given byte flags into the state.
 /// The data book describe the mapping from a byte to each flag.
@@ -224,8 +225,8 @@ void push_pair(State8080* state, SPECIAL_REGISTER register_pair) {
 void pop_to_pair(State8080* state, SPECIAL_REGISTER register_pair) {
 	uint8_t low = pop_byte(state);
 	uint8_t high = pop_byte(state);
-	uint16_t pairValue = bytes_to_word(low, high);
-	set_register_pair(state, register_pair, pairValue);
+	uint16_t pair_value = bytes_to_word(low, high);
+	set_register_pair(state, register_pair, pair_value);
 }
 
 uint8_t read_from_register_pair_address(State8080* state, SPECIAL_REGISTER register_pair) {
@@ -255,12 +256,12 @@ int emulate_8080_op(Cpu8080* cpu) {
 	return 0;
 } 
 
-void run_CPU(Cpu8080* cpu, uint64_t realTimeToRun, uint64_t speedScaling) {
-	uint64_t cyclesToRun = realTimeToRun * 2 * speedScaling; // 2Mhz
-	for (int cyclesRan = 0; cyclesRan < cyclesToRun;)
+void run_CPU(Cpu8080* cpu, uint64_t real_time_to_run, uint64_t speed_scaling) {
+	uint64_t cycles_to_run = real_time_to_run * 2 * speed_scaling; // 2Mhz
+	for (int cycles_ran = 0; cycles_ran < cycles_to_run;)
 	{
 		uint8_t opcode = get_next_opcode(cpu->state);
 		emulate_8080_op(cpu);
-		cyclesRan += opcode_to_cycles(opcode);
+		cycles_ran += opcode_to_cycles(opcode);
 	}
 }

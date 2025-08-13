@@ -49,14 +49,14 @@ void machine_out(OUTPUT_PORT port, uint8_t value, PortsState* ports_state) {
 	}
 }
 
-uint8_t machine_in(INPUT_PORT port, PortsState* portsState) {
+uint8_t machine_in(INPUT_PORT port, PortsState* ports_state) {
 	switch (port) {
 		case INPUT_0:
 		case INPUT_1:
 		case INPUT_2:
-			return portsState->input_ports[port];
+			return ports_state->input_ports[port];
 		case SHIFT_READ: {
-			return portsState->shift_value >> (8 - portsState->shift_offset);
+			return ports_state->shift_value >> (8 - ports_state->shift_offset);
 		}
 		default: {
 			return 0; // TODO: Crash in this case

@@ -22,14 +22,14 @@ static uint8_t keypress_to_bit_index(KeyPress key_press) {
 	return bit_index;
 }
 
-void machine_key_press(KeyPress key_press, PortsState* portsState) {
+void machine_key_press(KeyPress key_press, PortsState* ports_state) {
 	uint8_t port = keypress_to_port(key_press);
 	uint8_t bit = 1 << keypress_to_bit_index(key_press);
 
 	if (key_press.type == KEY_DOWN) {
-		portsState->input_ports[port] |= bit;
+		ports_state->input_ports[port] |= bit;
 	}
 	else {
-		portsState->input_ports[port] &= ~bit;
+		ports_state->input_ports[port] &= ~bit;
 	}
 }
