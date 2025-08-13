@@ -11,3 +11,25 @@ void sdl_play_sound_effects(bool sound_effects[NUMBER_OF_SOUND_EFFECTS], SDL_CON
 
 	}
 }
+
+uint64_t get_microseconds_since_start() {
+	static uint64_t start_counter = 0;
+	static uint64_t frequency = 0;
+
+	if (start_counter == 0) {
+		start_counter = SDL_GetPerformanceCounter();
+		frequency = SDL_GetPerformanceFrequency();
+	}
+
+	uint64_t current_counter = SDL_GetPerformanceCounter();
+	uint64_t elapsed = current_counter - start_counter;
+	return (elapsed * 1000000) / frequency;
+}
+
+void sdl_handle_system_events(MachineState* machine_state) {
+	SDL_PumpEvents();
+	SDL_Event event;
+	if (SDL_PeepEvents(&event, 1, SDL_GETEVENT, SDL_EVENT_WINDOW_CLOSE_REQUESTED, SDL_EVENT_WINDOW_CLOSE_REQUESTED) > 0) {
+		exit_machine(machine_state);
+	}
+}
