@@ -26,7 +26,7 @@ Playable - ongoing refinements and improvements.
 
 - C compiler
 - SDL3 (for included implementation)
-- Space Invaders ROM files
+- Space Invaders ROM file
 - Audio files
 
 ---
