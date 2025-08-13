@@ -6,9 +6,9 @@
 /// </summary>
 /// <param name="state"></param>
 /// <param name="opcode"></param>
-/// <param name="range_min"></param>
+/// <param name="range_min">First opcode (not including the immediate) in a specific opcode type</param>
 /// <param name="immediate_opcode"></param>
-static uint16_t get_single_target_value(State8080 *state, uint8_t *opcode, uint8_t range_min, uint8_t immediate_opcode)
+static uint16_t get_single_target_value(State8080 *state, uint8_t *opcode, OPCODE range_min, OPCODE immediate_opcode)
 {
 	uint16_t target_value;
 	if (*opcode == immediate_opcode)

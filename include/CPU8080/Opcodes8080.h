@@ -1,19 +1,9 @@
 #pragma once
 
-
 #include <inttypes.h>
 #include <stdbool.h>
 
 #include "Emulate8080.h"
-
-
-typedef bool (*should_handle_func) (uint8_t opcode);
-typedef void (*handle_opcode) (Cpu8080* cpu, State8080* state, uint8_t* opcode);
-typedef struct {
-	const should_handle_func should_handle_func;
-	const handle_opcode handle_func;
-} OpcodeHandler;
-
 
 typedef enum OPCODE {
 	SHLD = 0x22,
@@ -92,7 +82,6 @@ typedef enum OPCODE {
 	DCX_H = 0x2b,
 	DCX_SP = 0x3b,
 
-
 	MOV = 0x40,
 	MOV_END_RANGE = MOV + NUMBER_OF_OPCODE_REGISTERS * NUMBER_OF_OPCODE_REGISTERS - 1,
 
@@ -158,7 +147,6 @@ typedef enum OPCODE {
 	RST6 = 0xf7,
 	RST7 = 0xff,
 
-
 	// RET instructions
 	RET = 0xc9,
 	RNZ = 0xc0,
@@ -195,16 +183,24 @@ typedef enum CONDITION_TYPE {
 	NO_CONDITION,
 } CONDITION_TYPE;
 
+typedef bool (*should_handle_func) (OPCODE opcode);
+typedef void (*handle_opcode) (Cpu8080* cpu, State8080* state, uint8_t* opcode);
+typedef struct {
+	const should_handle_func should_handle_func;
+	const handle_opcode handle_func;
+} OpcodeHandler;
+
+
 extern const OpcodeHandler handlers[];
 extern const int handlers_size;
 
-#define SINGLE_VALUE_SHOULD_HANDLE(VALUE) bool is_value_##VALUE(uint8_t opcode) { return opcode == VALUE;}
-#define RANGE_VALUE_SHOULD_HANDLE(MIN, MAX) bool is_between_##MIN##_##MAX(uint8_t opcode) { return opcode >= MIN && opcode <= MAX;}
-#define RANGE_AND_SINGLE_VALUE_SHOULD_HANDLE(MIN, MAX, VALUE) bool is_between_##MIN##_##MAX##_or_##VALUE(uint8_t opcode) { return (opcode >= MIN && opcode <= MAX) || opcode == VALUE;}
-#define RANGE_WITH_HOLE_VALUE_SHOULD_HANDLE(MIN, MAX, HOLE) bool is_between_##MIN##_##MAX##_without_##HOLE(uint8_t opcode) { return opcode >= MIN && opcode <= MAX && opcode != HOLE;}
+#define SINGLE_VALUE_SHOULD_HANDLE(VALUE) bool is_value_##VALUE(OPCODE opcode) { return opcode == VALUE;}
+#define RANGE_VALUE_SHOULD_HANDLE(MIN, MAX) bool is_between_##MIN##_##MAX(OPCODE opcode) { return opcode >= MIN && opcode <= MAX;}
+#define RANGE_AND_SINGLE_VALUE_SHOULD_HANDLE(MIN, MAX, VALUE) bool is_between_##MIN##_##MAX##_or_##VALUE(OPCODE opcode) { return (opcode >= MIN && opcode <= MAX) || opcode == VALUE;}
+#define RANGE_WITH_HOLE_VALUE_SHOULD_HANDLE(MIN, MAX, HOLE) bool is_between_##MIN##_##MAX##_without_##HOLE(OPCODE opcode) { return opcode >= MIN && opcode <= MAX && opcode != HOLE;}
 #define DISCRETE_VALUE_SHOULD_HANDLE(NAME, ...)                          \
-    static bool is_value_part_of_##NAME(uint8_t opcode) {                              \
-        const uint8_t valid_opcodes[] = { __VA_ARGS__ };                 \
+    static bool is_value_part_of_##NAME(OPCODE opcode) {                              \
+        const OPCODE valid_opcodes[] = { __VA_ARGS__ };                 \
         for (size_t i = 0; i < sizeof(valid_opcodes) / sizeof(valid_opcodes[0]); ++i) { \
             if (opcode == valid_opcodes[i]) return true;                \
         }                                                                \
