@@ -21,7 +21,7 @@ static void open_game_rom(GameRom* game_rom, char rom_path[PATH_BUFFER_SIZE]) {
 	fclose(code_fp);
 }
 
-MachineState* init_machine(char rom_path[PATH_BUFFER_SIZE], void* platform_context, play_sound_effects play_sound_effects_func, EventsFunctions events_functions, DisplayFunctions display_functions, TimeFunctions time_functions) {
+MachineState* init_machine(char rom_path[PATH_BUFFER_SIZE], PlatformInterface platform_interface) {
 	GameRom game_rom;
 	open_game_rom(&game_rom, rom_path);
 	if (game_rom.size == 0 || game_rom.code_buffer == NULL) {
@@ -38,12 +38,8 @@ MachineState* init_machine(char rom_path[PATH_BUFFER_SIZE], void* platform_conte
 	machine_state->cpu->state->sp = SP_START;
 
 	machine_state->mwState = init_mw_state(machine_state->cpu);
-	machine_state->platform_context = platform_context;
 
-	machine_state->play_sound_effects_func = play_sound_effects_func;
-	machine_state->display_functions = display_functions;
-	machine_state->events_functions = events_functions;
-	machine_state->time_functions = time_functions;
+	machine_state->platform_interface = platform_interface;
 
 	for (SOUND_EFFECT_INVADERS sound_effect = UFO; sound_effect < NUMBER_OF_SOUND_EFFECTS; sound_effect++) {
 		machine_state->previous_active_sound_effects[sound_effect] = false; // Initialize all sound effects to false.
@@ -60,7 +56,7 @@ MachineState* init_machine(char rom_path[PATH_BUFFER_SIZE], void* platform_conte
 void free_machine(MachineState* machine_state) {
 	free_cpu(machine_state->cpu);
 	free_MWState(machine_state->mwState);
-	machine_state->display_functions.free_renderer_func(machine_state->platform_context);
+	machine_state->platform_interface.display.free_renderer_func(machine_state->platform_interface.platform_context);
 	free(machine_state);
 }
 
@@ -73,8 +69,7 @@ static void handle_input(MachineState* machine_state) {
 	for (int i = 0; i < MAX_KEY_PRESSES; i++) {
 		key_presses[i] = INVALID_KEY_PRESS;
 	}
-
-	machine_state->events_functions.poll_key_presses_func(key_presses, machine_state);
+	machine_state->platform_interface.events.poll_key_presses_func(key_presses, machine_state);
 	for (int i = 0; isValidKeyPress(key_presses[i]); i++) {
 		machine_key_press(key_presses[i], &machine_state->mwState->ports);
 	}
@@ -83,7 +78,7 @@ static void handle_input(MachineState* machine_state) {
 static void handle_render_frame(MachineState* machine_state) {
 	static COLOR_FILTER frameBufferFromMemory[FRAME_HEIGHT][FRAME_WIDTH] = { 0 };
 	get_colored_frame(get_frame_buffer(machine_state->cpu), frameBufferFromMemory);
-	machine_state->display_functions.render_frame_func(frameBufferFromMemory, machine_state->platform_context);
+	machine_state->platform_interface.display.render_frame_func(frameBufferFromMemory, machine_state->platform_interface.platform_context);
 }
 
 bool toggle_machine_running(MachineState* machine_state) {
@@ -97,15 +92,15 @@ void exit_machine(MachineState* machine_state) {
 }
 
 void run_machine(MachineState* machine_state) {
-	uint64_t last_run_time = machine_state->time_functions.microsecond_tick_func();
+	uint64_t last_run_time = machine_state->platform_interface.time.microsecond_tick_func();
 	uint64_t next_interrupt = last_run_time + 16666;
 	int current_interrupt = 1;
 
 	while (!machine_state->should_exit) {
 		handle_input(machine_state);
-		machine_state->events_functions.poll_system_events_func(machine_state);
+		machine_state->platform_interface.events.poll_system_events_func(machine_state);
 		if (machine_state->is_running) {
-			uint64_t currentRunTime = machine_state->time_functions.microsecond_tick_func();
+			uint64_t currentRunTime = machine_state->platform_interface.time.microsecond_tick_func();
 			if (currentRunTime > next_interrupt && machine_state->cpu->state->interrupt_enable) {
 				generate_interrupt(machine_state->cpu->state, current_interrupt + 1);
 				//generate_interrupt(machine_state->cpu->state, 1);
@@ -118,6 +113,6 @@ void run_machine(MachineState* machine_state) {
 			play_frame_sound_effects(machine_state);
 			last_run_time = currentRunTime;
 		}
-		machine_state->time_functions.sleep_func(1);
+		machine_state->platform_interface.time.sleep_func(1);
 	}
 }

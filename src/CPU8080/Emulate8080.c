@@ -24,9 +24,7 @@ Cpu8080* init_cpu_state(size_t bufferSize, uint8_t* codeBuffer, size_t memorySiz
 		free(cpu);
 		return NULL;
 	}
-	memcpy_s(cpu->state->memory, memorySize, codeBuffer, bufferSize);
-	//cpu->state->interrupt_enable = true; // TODO: ????
-	
+	memcpy_s(cpu->state->memory, memorySize, codeBuffer, bufferSize);	
 	return cpu;
 }
 uint16_t get_register_pair(State8080* state, SPECIAL_REGISTER register_pair) {

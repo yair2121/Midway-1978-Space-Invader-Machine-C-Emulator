@@ -33,21 +33,6 @@ typedef struct Color_Screen_Boundaries {
 /// </summary>
 extern const Color_Screen_Boundaries color_regions[NUM_COLOR_REGIONS];
 
-
-
-typedef void (*render_frame) (COLOR_FILTER frame[FRAME_HEIGHT][FRAME_WIDTH], void* context);
-typedef void (*free_renderer) (void* context);
-//typedef void* (*init_renderer) (void* context);
-
-/// <summary>
-/// Functions to initialize, render, and free the display renderer.
-/// </summary>
-typedef struct DisplayFunctions {
-	//init_renderer init_renderer_func;
-	render_frame render_frame_func;
-	free_renderer free_renderer_func;
-} DisplayFunctions;
-
 void get_frame(uint8_t frameBufferFromMemory[FRAME_BUFFER_SIZE], uint8_t resultBuffer[FRAME_HEIGHT][FRAME_WIDTH]);
 
 /// <summary>

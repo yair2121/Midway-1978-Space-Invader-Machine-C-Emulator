@@ -1,7 +1,7 @@
 #pragma once
 #include "SpaceInvaderMachine.h"
-typedef struct SDL_CONTEXT SDL_CONTEXT;
 
+typedef struct SDL_CONTEXT SDL_CONTEXT;
 
 typedef struct SoundEffect_SDL {
 	SDL_AudioSpec spec; // Audio specification for the sound effect

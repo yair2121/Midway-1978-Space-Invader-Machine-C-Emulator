@@ -10,7 +10,6 @@
 #include "SDL_platform.h"
 
 
-
 int main(int argc, char** argv) {
 	if (SDL_Init(SDL_INIT_GAMEPAD) < 0) {
 		SDL_Log("SDL_Init errors: %s", SDL_GetError());
@@ -33,7 +32,14 @@ int main(int argc, char** argv) {
 	DisplayFunctions display_functions = (DisplayFunctions) { render_frame_SDL, destroy_renderer_SDL};
 	EventsFunctions events_functions = (EventsFunctions) { poll_keys, sdl_handle_system_events };
 	TimeFunctions time_functions = (TimeFunctions) { SDL_Delay, get_microseconds_since_start };
-	MachineState* machine_state = init_machine(game_rom_path, &sdl_context, sdl_play_sound_effects, events_functions, display_functions, time_functions); // 16K
+	PlatformInterface platform_interface = {
+		.platform_context = &sdl_context,
+		.play_sound_effects_func = sdl_play_sound_effects,
+		.events = events_functions,
+		.display = display_functions,
+		.time = time_functions
+	};
+	MachineState* machine_state = init_machine(game_rom_path, platform_interface); // 16K
 
 	machine_state->is_running = true;
 	run_machine(machine_state);
