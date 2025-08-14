@@ -15,3 +15,5 @@ typedef struct SDL_CONTEXT {
 void sdl_play_sound_effects(bool sound_effects[NUMBER_OF_SOUND_EFFECTS], SDL_CONTEXT* platform_context);
 
 void sdl_handle_system_events(MachineState* machine_state);
+
+void destroy_platform_context(SDL_CONTEXT* platform_context);

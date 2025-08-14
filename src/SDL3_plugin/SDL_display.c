@@ -16,18 +16,17 @@ static uint32_t color_to_rgba(COLOR_FILTER color) {
 
 }
 
-void init_renderer_SDL(SDL_CONTEXT* context) {
+bool init_renderer_sdl(SDL_CONTEXT* context) {
 	if (SDL_Init(SDL_INIT_VIDEO) < 0) {
-		SDL_Log("SDL_Init errors: %s", SDL_GetError());
-		return NULL;
+		SDL_Log("SDL_Init errors\n");
+		return false;
 	}
 	DisplayParams_SDL* display_params = &context->display;
 
 	SDL_PropertiesID props = SDL_CreateProperties();
 	if (props == 0) {
-		SDL_Log("Unable to create properties: %s", SDL_GetError());
-		SDL_Quit();
-		return;
+		SDL_Log("Unable to create properties\n");
+		return false;
 	}
 
 	SDL_SetStringProperty(props, SDL_PROP_WINDOW_CREATE_TITLE_STRING, "Space Invaders");
@@ -37,26 +36,23 @@ void init_renderer_SDL(SDL_CONTEXT* context) {
 	
 	display_params->window = SDL_CreateWindowWithProperties(props);
 	if (!display_params->window) {
-		SDL_Log("SDL_CreateWindow errors: %s", SDL_GetError());
-		SDL_Quit();
-		return;
+		SDL_Log("SDL_CreateWindow errors\n");
+		return false;
 	}
 
 	display_params->renderer = SDL_CreateRenderer(display_params->window, NULL);
 	if (!display_params->renderer) {
-		SDL_Log("SDL_CreateRenderer failed: %s", SDL_GetError());
+		SDL_Log("SDL_CreateRenderer failed\n");
 		SDL_DestroyWindow(display_params->window);
-		SDL_Quit();
-		return;
+		return false;
 	}
 	// Allocate pixel buffer
 	display_params->pixel_buffer = (uint32_t*)malloc(FRAME_WIDTH * FRAME_HEIGHT * sizeof(uint32_t));
 	if (!display_params->pixel_buffer) {
-		SDL_Log("Failed to allocate pixel buffer memory");
+		SDL_Log("Failed to allocate pixel buffer memory\n");
 		SDL_DestroyRenderer(display_params->renderer);
 		SDL_DestroyWindow(display_params->window);
-		SDL_Quit();
-		return;
+		return false;
 	}
 
 	// Create texture
@@ -68,16 +64,15 @@ void init_renderer_SDL(SDL_CONTEXT* context) {
 		FRAME_HEIGHT
 	);
 	if (!display_params->framebuffer_texture) {
-		SDL_Log("SDL_CreateTexture failed: %s", SDL_GetError());
+		SDL_Log("SDL_CreateTexture failed\n");
 		free(display_params->pixel_buffer);
 		SDL_DestroyRenderer(display_params->renderer);
 		SDL_DestroyWindow(display_params->window);
-		SDL_Quit();
-		return;
+		return false;
 	}
 
 	SDL_SetTextureScaleMode(display_params->framebuffer_texture, SDL_SCALEMODE_NEAREST);
-	return display_params;
+	return true;
 }
 
 
@@ -165,15 +160,13 @@ void render_frame_SDL(COLOR_FILTER frame[FRAME_HEIGHT][FRAME_WIDTH], SDL_CONTEXT
 	SDL_RenderPresent(display_params_sdl->renderer);
 }
 
-void destroy_renderer_SDL(SDL_CONTEXT* context) {
-	DisplayParams_SDL display_params = context->display;
-	SDL_DestroyTexture(display_params.framebuffer_texture);
-	free(display_params.pixel_buffer);
+void destroy_renderer_sdl(DisplayParams_SDL* display_params_sdl) {
+	SDL_DestroyTexture(display_params_sdl->framebuffer_texture);
+	free(display_params_sdl->pixel_buffer);
 
-	SDL_DestroyRenderer(display_params.renderer);
-	SDL_DestroyWindow(display_params.window);
-
-	SDL_Quit();
+	SDL_DestroyRenderer(display_params_sdl->renderer);
+	SDL_DestroyWindow(display_params_sdl->window);
+	SDL_QuitSubSystem(SDL_INIT_VIDEO);
 }
 
 

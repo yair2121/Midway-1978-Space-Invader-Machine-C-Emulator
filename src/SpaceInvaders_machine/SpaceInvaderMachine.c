@@ -5,7 +5,7 @@ static void open_game_rom(GameRom* game_rom, char rom_path[PATH_BUFFER_SIZE]) {
 	FILE* code_fp = fopen(rom_path, "rb");
 	if (code_fp == NULL) {
 		printf("Not able to open the file space invader rom. Please add it to the %s.", rom_path);
-		exit(1); // TODO: think about how to handle this error better.
+		return;
 	}
 
 	fseek(code_fp, 0L, SEEK_END);
@@ -15,7 +15,7 @@ static void open_game_rom(GameRom* game_rom, char rom_path[PATH_BUFFER_SIZE]) {
 	game_rom->code_buffer = (uint8_t*)malloc(fileSize);
 	if (game_rom->code_buffer == NULL) {
 		printf("Memory allocation failed.");
-		exit(1);
+		return;
 	}
 	game_rom->size = fread(game_rom->code_buffer, 1, fileSize, code_fp); // TODO: Validate that return value equal fileSize
 	fclose(code_fp);
@@ -31,21 +31,31 @@ MachineState* init_machine(char rom_path[PATH_BUFFER_SIZE], PlatformInterface pl
 
 	MachineState* machine_state = (MachineState*)malloc(sizeof(MachineState));
 	if (machine_state == NULL) {
+		printf("Failed to allocate memory for the MachineState");
 		return NULL;
 	}
 
 	machine_state->cpu = init_cpu_state(game_rom.size, game_rom.code_buffer, INVADERS_RAM_SIZE);
+	if (machine_state->cpu == NULL) {
+		free(game_rom.code_buffer);
+		free(machine_state);
+		return NULL;
+	}
 	machine_state->cpu->state->sp = SP_START;
 
 	machine_state->mwState = init_mw_state(machine_state->cpu);
+	if (machine_state->mwState == NULL) {
+		free_cpu(machine_state->cpu);
+		free(game_rom.code_buffer);
+		free(machine_state);
+		return NULL;
+	}
 
 	machine_state->platform_interface = platform_interface;
 
 	for (SOUND_EFFECT_INVADERS sound_effect = UFO; sound_effect < NUMBER_OF_SOUND_EFFECTS; sound_effect++) {
 		machine_state->previous_active_sound_effects[sound_effect] = false; // Initialize all sound effects to false.
-	}
-
-	
+	}	
 
 	machine_state->is_running = false;
 	machine_state->should_exit = false;
@@ -56,7 +66,6 @@ MachineState* init_machine(char rom_path[PATH_BUFFER_SIZE], PlatformInterface pl
 void free_machine(MachineState* machine_state) {
 	free_cpu(machine_state->cpu);
 	free_MWState(machine_state->mwState);
-	machine_state->platform_interface.display.free_renderer_func(machine_state->platform_interface.platform_context);
 	free(machine_state);
 }
 
@@ -89,7 +98,7 @@ void exit_machine(MachineState* machine_state) {
 
 void run_machine(MachineState* machine_state) {
 	uint64_t last_run_time = machine_state->platform_interface.time.microsecond_tick_func();
-	uint64_t next_interrupt = last_run_time + 16666;
+	uint64_t next_interrupt = last_run_time + MILLISECOND_PER_FRAME;
 	int current_interrupt = 1;
 
 	while (!machine_state->should_exit) {
@@ -99,9 +108,8 @@ void run_machine(MachineState* machine_state) {
 			uint64_t currentRunTime = machine_state->platform_interface.time.microsecond_tick_func();
 			if (currentRunTime > next_interrupt && machine_state->cpu->state->interrupt_enable) {
 				generate_interrupt(machine_state->cpu->state, current_interrupt + 1);
-				//generate_interrupt(machine_state->cpu->state, 1);
 				current_interrupt = (current_interrupt + 1) % 2;
-				next_interrupt = currentRunTime + 8333;
+				next_interrupt = currentRunTime + MILLISECOND_PER_FRAME / 2; // Half frame
 				handle_render_frame(machine_state);
 			}
 

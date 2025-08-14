@@ -3,6 +3,7 @@
 MWState* init_mw_state(Cpu8080* cpu) {
 	MWState* mwState = (MWState*)calloc(1, sizeof(MWState));
 	if (mwState == NULL) {
+		printf("Failed to allocate memory for the MWState");
 		return NULL;
 	}
 
@@ -19,7 +20,7 @@ void free_MWState(MWState* mwState)
 
 uint8_t* get_frame_buffer(Cpu8080* cpu)
 {
-	return cpu->state->memory + 0x2400; // Frame buffer start at 0x2400 offset
+	return cpu->state->memory + 0x2400; 
 }
 
 void machine_out(OUTPUT_PORT port, uint8_t value, PortsState* ports_state) {

@@ -52,5 +52,5 @@ void play_frame_sound_effects(MachineState* machine_state) {
 	bool sound_effects_to_play[NUMBER_OF_SOUND_EFFECTS] = { false }; // We fill only the ones that were added in this frame
 	determine_effects_to_play(sound_effects_to_play, current_sound_effects, previous_active_effects);
 
-	machine_state->platform_interface.play_sound_effects_func(sound_effects_to_play, machine_state->platform_interface.platform_context);
+	machine_state->platform_interface.sound.play_sound_effects_func(sound_effects_to_play, machine_state->platform_interface.platform_context);
 }

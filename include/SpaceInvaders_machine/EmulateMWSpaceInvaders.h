@@ -34,6 +34,11 @@ typedef struct MWState {
 
 MWState* init_mw_state(Cpu8080* cpu);
 void free_MWState(MWState* mwState);
+/// <summary>
+/// Frame buffer start at 0x2400 offset
+/// </summary>
+/// <param name="cpu"></param>
+/// <returns></returns>
 int8_t* get_frame_buffer(Cpu8080* cpu);
 
 void machine_out(OUTPUT_PORT port, uint8_t value, PortsState* ports_state);

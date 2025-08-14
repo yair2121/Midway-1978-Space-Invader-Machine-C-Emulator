@@ -9,17 +9,20 @@ bool is_pair(SPECIAL_REGISTER special_register) {
 Cpu8080* init_cpu_state(size_t buffer_size, uint8_t* code_buffer, size_t memory_size) {
 	Cpu8080* cpu = (Cpu8080*)calloc(1, sizeof(Cpu8080));
 	if (cpu == NULL) {
+		printf("Failed to allocate memory for the CPU");
 		return NULL;
 	}
 
 	cpu->state = (State8080*)calloc(1, sizeof(State8080));
 	if (cpu->state == NULL) {
 		free(cpu);
+		printf("Failed to allocate memory for the State8080");
 		return NULL;
 	}
 
 	cpu->state->memory = (uint8_t*)calloc(memory_size, sizeof(uint8_t));
 	if (cpu->state->memory == NULL) {
+		printf("Failed to allocate memory for the RAM");
 		free(cpu->state);
 		free(cpu);
 		return NULL;

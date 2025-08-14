@@ -38,9 +38,7 @@ typedef struct EventsFunctions {
 /// Functions to initialize, render, and free the display renderer.
 /// </summary>
 typedef struct DisplayFunctions {
-	//init_renderer init_renderer_func;
 	render_frame render_frame_func;
-	free_renderer free_renderer_func;
 } DisplayFunctions;
 
 /// <summary>
@@ -52,12 +50,20 @@ typedef struct TimeFunctions {
 } TimeFunctions;
 
 /// <summary>
+/// The machine functions that are used to play sound.
+/// </summary>
+typedef struct SoundFunctions {
+	play_sound_effects play_sound_effects_func;
+} SoundFunctions;
+
+
+/// <summary>
 /// Platform specific interface for sound, display, general event and input functions.
 /// Additionally, a platform can provide its own needed context.
 /// </summary>
 typedef struct PlatformInterface {
 	void* platform_context;
-	play_sound_effects play_sound_effects_func;
+	SoundFunctions sound;
 	EventsFunctions events;
 	DisplayFunctions display;
 	TimeFunctions time;

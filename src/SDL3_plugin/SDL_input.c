@@ -38,3 +38,10 @@ void poll_keys(KeyPress key_presses_buffer[MAX_KEY_PRESSES], MachineState* machi
 	}
 }
 
+bool init_input_sdl() {
+	return SDL_Init(SDL_INIT_GAMEPAD);
+}
+
+void destroy_input_sdl() {
+	SDL_QuitSubSystem(SDL_INIT_GAMEPAD);
+}

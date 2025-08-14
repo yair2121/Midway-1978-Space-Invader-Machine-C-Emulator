@@ -7,6 +7,8 @@
 #define SP_START 0x2400
 #define PATH_BUFFER_SIZE 0x100
 #define INVADERS_RAM_SIZE 0x4000 // 16KB of RAM
+#define MILLISECOND_PER_FRAME 16666 // 16KB of RAM
+
 
 typedef struct GameRom {
 	size_t size;

@@ -33,3 +33,12 @@ void sdl_handle_system_events(MachineState* machine_state) {
 		exit_machine(machine_state);
 	}
 }
+
+void destroy_platform_context(SDL_CONTEXT* platform_context) {
+	if (platform_context != NULL) {
+		destroy_renderer_sdl(&platform_context->display);
+		destroy_input_sdl();
+		destroy_sound_effects_sdl(&platform_context->sound_effects);
+	}
+	SDL_Quit();
+}
