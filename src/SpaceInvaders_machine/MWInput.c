@@ -11,6 +11,10 @@ static INPUT_PORT keypress_to_port(KeyPress key_press) {
 	}
 }
 
+bool is_valid_key_press(KeyPress keyPress) {
+	return keyPress.key != INVALID_KEY_PRESS.key && keyPress.player != INVALID_KEY_PRESS.player && keyPress.type != INVALID_KEY_PRESS.type;
+}
+
 /// <summary>
 /// </summary>
 /// <param name="key_press"></param>

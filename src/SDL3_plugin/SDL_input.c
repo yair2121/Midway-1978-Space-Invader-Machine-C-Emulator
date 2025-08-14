@@ -1,19 +1,25 @@
 #include "SDL_input.h"
 
-static KEY key_to_gameKey(SDL_KeyboardEvent keyboard_event) {
-	switch (keyboard_event.key) {
-	case SDLK_LEFT:
-		return LEFT;
-	case SDLK_RIGHT:
-		return RIGHT;
-	case SDLK_D:
-		return SHOOT;
-	case SDLK_E:
-		return START;
-	case SDLK_R:
-		return COIN;
+/// <summary>
+/// Currently only supporting Player1.
+/// </summary>
+static const KeyMapping key_mappings[] = {
+	{SDLK_LEFT , {LEFT, PLAYER_1}},
+	{SDLK_RIGHT , {RIGHT, PLAYER_1}},
+	{SDLK_SPACE , {SHOOT, PLAYER_1}},
+	{SDLK_RETURN , {START, PLAYER_1}},
+	{SDLK_RSHIFT , {COIN, IRRELEVANT}},
+};
+
+static KeyPress key_event_to_game_key(SDL_Event key_event) {
+	for (size_t i = 0; i < SDL_arraysize(key_mappings); ++i) {
+		if (key_mappings[i].sdl_key == key_event.key.key) {
+			KeyPress key_press = key_mappings[i].key_press;
+			key_press.type = key_event.type == SDL_EVENT_KEY_DOWN ? KEY_DOWN : KEY_UP;
+			return key_press;
+		}
 	}
-	return KEY_COUNT;
+	return INVALID_KEY_PRESS; // Not mapped
 }
 
 void poll_keys(KeyPress key_presses_buffer[MAX_KEY_PRESSES], MachineState* machine_state) {
@@ -23,10 +29,12 @@ void poll_keys(KeyPress key_presses_buffer[MAX_KEY_PRESSES], MachineState* machi
 
 	int index = 0;
 	for (int i = 0; i < count && index < MAX_KEY_PRESSES; i++) {
-		KEY key = key_to_gameKey(events[i].key);
-		KEY_PRESS_TYPE type = events[i].type == SDL_EVENT_KEY_DOWN ? KEY_DOWN : KEY_UP;
-		printf("%d is %s\n", key, type == KEY_DOWN ? "down" : "up");
-		key_presses_buffer[index++] = (KeyPress){ key, PLAYER_1, type };
+		KeyPress key_press = key_event_to_game_key(events[i]);
+		if (is_valid_key_press(key_press) == false) continue;
+
+		//key_press.type = events[i].type == SDL_EVENT_KEY_DOWN ? KEY_DOWN : KEY_UP;
+		SDL_Log("Key %d is %s", key_press.key, key_press.type == KEY_DOWN ? "down" : "up");
+		key_presses_buffer[index++] = key_press;
 	}
 }
 

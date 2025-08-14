@@ -1,4 +1,5 @@
 #pragma once
+#include <stdbool.h>
 
 typedef struct PortsState PortsState;
 
@@ -17,7 +18,7 @@ typedef enum KEY {
 	INVALID_KEY = -1,
 	COIN = 0,
 	START = 1,
-	TILT = 2,
+	TILT = 2, // Not used in Space Invader 
 	KEY_PADDING = 3, // Padding to match the original Space Invaders machine layout
 	SHOOT = 4,
 	LEFT = 5,
@@ -30,7 +31,7 @@ typedef enum PLAYER {
 	PLAYER_1 = 1, // Start from 1 to fit the Space Invaders machine port layout.
 	PLAYER_2 = 2,
 	PLAYER_COUNT = PLAYER_2,
-	IRRELEVANT = 3,
+	IRRELEVANT = PLAYER_1,
 } PLAYER;
 
 typedef struct KeyPress {
@@ -40,3 +41,4 @@ typedef struct KeyPress {
 } KeyPress;
 
 void machine_key_press(KeyPress key_press, PortsState* ports_state);
+bool is_valid_key_press(KeyPress keyPress);

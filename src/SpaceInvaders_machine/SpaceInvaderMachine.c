@@ -60,17 +60,13 @@ void free_machine(MachineState* machine_state) {
 	free(machine_state);
 }
 
-static bool isValidKeyPress(KeyPress keyPress) {
-	return keyPress.key != INVALID_KEY_PRESS.key && keyPress.player != INVALID_KEY_PRESS.player && keyPress.type != INVALID_KEY_PRESS.type;
-}
-
 static void handle_input(MachineState* machine_state) {
 	KeyPress key_presses[MAX_KEY_PRESSES];
 	for (int i = 0; i < MAX_KEY_PRESSES; i++) {
 		key_presses[i] = INVALID_KEY_PRESS;
 	}
 	machine_state->platform_interface.events.poll_key_presses_func(key_presses, machine_state);
-	for (int i = 0; isValidKeyPress(key_presses[i]); i++) {
+	for (int i = 0; is_valid_key_press(key_presses[i]); i++) {
 		machine_key_press(key_presses[i], &machine_state->mwState->ports);
 	}
 }

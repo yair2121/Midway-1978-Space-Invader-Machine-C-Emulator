@@ -2,7 +2,6 @@
 
 #include "SDL_platform.h"
 
-
 bool is_playing_sound_effect(SoundEffectParams_SDL sound_effect_params) {
 	return SDL_GetAudioStreamAvailable(sound_effect_params.stream) > 0;
 }
