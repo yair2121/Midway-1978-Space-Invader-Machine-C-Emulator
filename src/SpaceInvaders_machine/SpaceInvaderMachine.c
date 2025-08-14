@@ -99,8 +99,7 @@ void exit_machine(MachineState* machine_state) {
 void run_machine(MachineState* machine_state) {
 	uint64_t last_run_time = machine_state->platform_interface.time.microsecond_tick_func();
 	uint64_t next_interrupt = last_run_time + MILLISECOND_PER_FRAME;
-	int current_interrupt = 1;
-
+	uint8_t current_interrupt = 1; // Alternating between 1 and 2 for the two interrupts used for Space Invader Display.
 	while (!machine_state->should_exit) {
 		handle_input(machine_state);
 		machine_state->platform_interface.events.poll_system_events_func(machine_state);
@@ -117,6 +116,6 @@ void run_machine(MachineState* machine_state) {
 			play_frame_sound_effects(machine_state);
 			last_run_time = currentRunTime;
 		}
-		machine_state->platform_interface.time.sleep_func(1);
+		machine_state->platform_interface.time.sleep_func(MILLISECOND_PER_MACHINE_ITERATION);
 	}
 }

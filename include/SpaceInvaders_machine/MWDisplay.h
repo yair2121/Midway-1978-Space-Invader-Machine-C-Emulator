@@ -6,7 +6,8 @@
 #define FRAME_WIDTH 224
 #define FRAME_HEIGHT 256
 #define SPACE_INVADERS_ASPECT_RATIO ((float)FRAME_WIDTH / (float)FRAME_HEIGHT)
-#define FRAME_BUFFER_SIZE ((FRAME_WIDTH * FRAME_HEIGHT) / 8)
+#define FRAME_BUFFER_SIZE ((FRAME_WIDTH * FRAME_HEIGHT) / 8) // Each byte in the frame buffer represents 8 pixels vertically
+#define NUM_COLOR_REGIONS 7
 
 typedef enum COLOR_FILTER {
 	BLACK = 0,
@@ -27,7 +28,6 @@ typedef struct Color_Screen_Boundaries {
 	ScreenPosition start_right; // Y coordinate (0-223)
 } Color_Screen_Boundaries;
 
-#define NUM_COLOR_REGIONS 7
 /// <summary>
 /// Screen boundaries for each color region.
 /// </summary>

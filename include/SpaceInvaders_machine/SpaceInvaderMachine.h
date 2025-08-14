@@ -1,13 +1,13 @@
 #pragma once
 
 #include "Emulate8080.h"
-
 #include "SpaceInvaderPlatformInterface.h"
 
 #define SP_START 0x2400
 #define PATH_BUFFER_SIZE 0x100
 #define INVADERS_RAM_SIZE 0x4000 // 16KB of RAM
 #define MILLISECOND_PER_FRAME 16666 // 16KB of RAM
+#define MILLISECOND_PER_MACHINE_ITERATION 1 // How many millescond the machine should sleep between each iteration of the machine loop.
 
 
 typedef struct GameRom {
@@ -28,12 +28,7 @@ typedef struct MachineState {
 /// 
 /// </summary>
 /// <param name="rom_path">You need to provide your own 1978 Midway Space Invader arcade machine rom</param>
-/// <param name="memory_size">How much ram does the cpu will have, for space invader - 0x10000 is good</param>
-/// <param name="platform_context">Specific platform context, passed to Audio/Display/Input callback functions</param>
-/// <param name="play_sound_effects_func">Platform specific implementation for playing a sound effect</param>
-/// <param name="events_functions">Platform specific implementation for capturing input</param>
-/// <param name="display_functions">Platform specific implementation for displaying the game graphics</param>
-/// <param name="time_functions">Platform specific implementation for accurate timing functions</param>
+/// <param name="platform_interface"></param>
 /// <returns></returns>
 MachineState* init_machine(char rom_path[PATH_BUFFER_SIZE], PlatformInterface platform_interface);
 
