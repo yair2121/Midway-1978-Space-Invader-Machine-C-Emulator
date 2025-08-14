@@ -110,14 +110,6 @@ int opcode_to_cycles(uint8_t opcode);
 void generate_interrupt(State8080 *state, int interrupt_num);
 Cpu8080 *init_cpu_state(size_t buffer_size, uint8_t *code_buffer, size_t memory_size);
 
-/// <summary>
-/// Set the communication between the cpu and its machine through the IO ports.
-/// </summary>
-/// <param name="cpu"></param>
-/// <param name="in_task"></param>
-/// <param name="out_task"></param>
-void set_in_out_ports(Cpu8080 *cpu, InTask in_task, OutTask out_task);
-
 void free_cpu(Cpu8080 *state);
 
 void write_to_register_pair_address(State8080 *state, SPECIAL_REGISTER register_pair, uint8_t value);

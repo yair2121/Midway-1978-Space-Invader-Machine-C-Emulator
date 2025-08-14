@@ -16,12 +16,12 @@ static uint32_t color_to_rgba(COLOR_FILTER color) {
 
 }
 
-bool init_renderer_sdl(SDL_CONTEXT* context) {
+bool init_renderer_sdl(DisplayParams_SDL* display_params) {
+	SDL_Log("Initializing SDL renderer\n");
 	if (SDL_Init(SDL_INIT_VIDEO) < 0) {
 		SDL_Log("SDL_Init errors\n");
 		return false;
 	}
-	DisplayParams_SDL* display_params = &context->display;
 
 	SDL_PropertiesID props = SDL_CreateProperties();
 	if (props == 0) {
@@ -72,6 +72,7 @@ bool init_renderer_sdl(SDL_CONTEXT* context) {
 	}
 
 	SDL_SetTextureScaleMode(display_params->framebuffer_texture, SDL_SCALEMODE_NEAREST);
+	SDL_Log("SDL renderer initialized successfully\n");
 	return true;
 }
 
@@ -161,6 +162,7 @@ void render_frame_SDL(COLOR_FILTER frame[FRAME_HEIGHT][FRAME_WIDTH], SDL_CONTEXT
 }
 
 void destroy_renderer_sdl(DisplayParams_SDL* display_params_sdl) {
+	SDL_Log("Destroying DisplayParams_SDL\n");
 	SDL_DestroyTexture(display_params_sdl->framebuffer_texture);
 	free(display_params_sdl->pixel_buffer);
 

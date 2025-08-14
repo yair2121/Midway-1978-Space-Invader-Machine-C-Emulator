@@ -9,7 +9,8 @@ MWState* init_mw_state(Cpu8080* cpu) {
 
 	InTask in_task = { machine_in, &mwState->ports };
 	OutTask out_task = { machine_out, &mwState->ports };
-	set_in_out_ports(cpu, in_task, out_task);
+	cpu->in_task = in_task;
+	cpu->out_task = out_task;
 	return mwState;
 }
 

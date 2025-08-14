@@ -93,7 +93,6 @@ void write_to_memory(State8080* state, uint16_t offset, uint8_t value) {
 }
 
 uint8_t read_from_memory(State8080* state, uint16_t offset) {
-
 	return state->memory[offset];
 }
 
@@ -134,7 +133,12 @@ void byte_to_flags(State8080* state, uint8_t flags) {
 }
 
 uint8_t flags_to_byte(State8080* state) {
-	uint8_t flags = (state->cc[CARRY] << CARRY) | (1 << 1) | (state->cc[PARITY] << PARITY) | (state->cc[AC] << AC) | (state->cc[ZERO] << ZERO) | (state->cc[SIGN] << SIGN); // Bit 1 was set to 1 according to the CPU manual
+	uint8_t flags = (state->cc[CARRY] << CARRY) |
+		(1 << 1) | // Bit 1 was set to 1 according to the CPU manual.
+		(state->cc[PARITY] << PARITY) |
+		(state->cc[AC] << AC) |
+		(state->cc[ZERO] << ZERO) |
+		(state->cc[SIGN] << SIGN);
 	return flags;
 }
 
@@ -173,12 +177,6 @@ static void unimplemented_instruction(State8080* state)
 	print_state(state);
 	printf("Error: Unimplemented instruction 0x%02x\n", read_from_memory(state, state->pc)); // TODO: add information from the state.
 	exit(EXIT_FAILURE);
-}
-
-void set_in_out_ports(Cpu8080* cpu, InTask in_task, OutTask out_task)
-{
-	cpu->in_task = in_task;
-	cpu->out_task = out_task;
 }
 
 void free_cpu(Cpu8080* cpu) {

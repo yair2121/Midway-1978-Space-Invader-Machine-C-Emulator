@@ -43,5 +43,6 @@ bool init_input_sdl() {
 }
 
 void destroy_input_sdl() {
+	SDL_Log("Destroying SDL input subsystem\n");
 	SDL_QuitSubSystem(SDL_INIT_GAMEPAD);
 }

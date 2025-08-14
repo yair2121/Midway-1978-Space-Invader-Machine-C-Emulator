@@ -1,4 +1,3 @@
-
 #include <stdio.h>
 #include<stdlib.h>
 #include <string.h>
@@ -9,9 +8,24 @@
 
 #include "SDL_platform.h"
 
+static bool init_sdl_context(SDL_CONTEXT* sdl_context, char sound_effect_paths[NUMBER_OF_SOUND_EFFECTS][0x100]) {
+	if (init_input_sdl() == false) {
+		return 1;
+	}
+	if (init_sound_effects_sdl(&sdl_context->sound_effects, sound_effect_paths) == false) {
+		destroy_input_sdl();
+		return 1;
+	}
 
-int main(int argc, char** argv) {
+	if (init_renderer_sdl(&sdl_context->display) == false) {
+		destroy_sound_effects_sdl(&sdl_context->sound_effects);
+		destroy_input_sdl();
+		return 1;
+	}
+	return true;
+}
 
+int main(int argc, char* argv[]) {
 	char* game_rom_path = argv[1];
 	char* sound_directory = argv[2];
 
@@ -19,16 +33,9 @@ int main(int argc, char** argv) {
 	for (int i = 0; i < NUMBER_OF_SOUND_EFFECTS; i++) {
 		sprintf_s(sound_effect_paths[i], sizeof(sound_effect_paths[i]), "%s%d.wav", sound_directory, i);
 	}
-
-
 	SDL_CONTEXT sdl_context;
-	bool did_init_input = init_input_sdl();
-	bool did_init_sound_effects = init_sound_effects_sdl(&sdl_context.sound_effects, sound_effect_paths);
-	bool did_init_renderer = init_renderer_sdl(&sdl_context.display);
-	if (!did_init_input || !did_init_sound_effects || !did_init_renderer) {
-		SDL_Log(SDL_GetError());
-		return 1;
-	}
+
+	init_sdl_context(&sdl_context, sound_effect_paths);
 
 	DisplayFunctions display_functions = (DisplayFunctions) { render_frame_SDL};
 	EventsFunctions events_functions = (EventsFunctions) { poll_keys, sdl_handle_system_events };

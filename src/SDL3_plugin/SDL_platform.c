@@ -35,6 +35,7 @@ void sdl_handle_system_events(MachineState* machine_state) {
 }
 
 void destroy_platform_context(SDL_CONTEXT* platform_context) {
+	SDL_Log("Destroying SDL platform context\n");
 	if (platform_context != NULL) {
 		destroy_renderer_sdl(&platform_context->display);
 		destroy_input_sdl();

@@ -16,6 +16,7 @@ void play_sound_effect(SoundEffectParams_SDL sound_effect_params) {
 
 
 bool init_sound_effects_sdl(SoundEffects_SDL* sound_effects_sdl, const char sound_effect_paths[NUMBER_OF_SOUND_EFFECTS][0x100]) {
+	SDL_Log("Initializing SoundEffects_SDL\n");
 	if (SDL_Init(SDL_INIT_AUDIO) == false) {
 		SDL_Log("SDL_Init errors");
 		return false;
@@ -57,6 +58,7 @@ bool init_sound_effects_sdl(SoundEffects_SDL* sound_effects_sdl, const char soun
 }
 
 void destroy_sound_effects_sdl(SoundEffects_SDL* sound_effects_sdl) {
+	SDL_Log("Destroying SoundEffects_SDL\n");
 	for (SOUND_EFFECT_INVADERS sound_effect_invaders = UFO; sound_effect_invaders < NUMBER_OF_SOUND_EFFECTS; sound_effect_invaders++) {
 		SoundEffectParams_SDL* sound_effect_sdl = &sound_effects_sdl->params[sound_effect_invaders];
 		if (sound_effect_sdl->stream) {

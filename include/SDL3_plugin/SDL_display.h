@@ -17,7 +17,7 @@ typedef struct DisplayParams_SDL {
 void render_frame_SDL(COLOR_FILTER frame[FRAME_HEIGHT][FRAME_WIDTH], SDL_CONTEXT* context);
 
 void destroy_renderer_sdl(DisplayParams_SDL* display_params_sdl);
-bool init_renderer_sdl(SDL_CONTEXT* context);
+bool init_renderer_sdl(DisplayParams_SDL* display_params);
 
 extern const SDL_Color SDL_COLORS[NUMBER_OF_COLORS];
 

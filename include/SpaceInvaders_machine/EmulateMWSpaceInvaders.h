@@ -33,7 +33,9 @@ typedef struct MWState {
 } MWState;
 
 MWState* init_mw_state(Cpu8080* cpu);
+
 void free_MWState(MWState* mwState);
+
 /// <summary>
 /// Frame buffer start at 0x2400 offset
 /// </summary>
