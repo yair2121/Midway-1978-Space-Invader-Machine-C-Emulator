@@ -1,10 +1,7 @@
 #pragma once
 
-#include <inttypes.h>
 #include <stdlib.h>
 #include <stdbool.h>
-#include <string.h>
-#include <stdio.h>
 
 typedef enum GENERAL_REGISTER
 {
@@ -130,6 +127,7 @@ uint8_t flags_to_byte(State8080 *state);
 void op_rst(State8080* state, uint8_t N);
 /// <summary>/// /// </summary>/// <param name="special_register"></param>/// <returns>Whether the given special_register is BC/DE/HL</returns>
 bool is_pair(SPECIAL_REGISTER special_register);
-
+void push_pair(State8080* state, SPECIAL_REGISTER register_pair);
+void pop_to_pair(State8080* state, SPECIAL_REGISTER register_pair);
 
 void run_CPU(Cpu8080* cpu, uint64_t real_time_to_run, uint64_t speedScaling);
