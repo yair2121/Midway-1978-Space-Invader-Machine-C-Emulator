@@ -41,7 +41,7 @@ void free_MWState(MWState* mwState);
 /// </summary>
 /// <param name="cpu"></param>
 /// <returns></returns>
-int8_t* get_frame_buffer(Cpu8080* cpu);
+uint8_t* get_frame_buffer(Cpu8080* cpu);
 
 void machine_out(OUTPUT_PORT port, uint8_t value, PortsState* ports_state);
 
