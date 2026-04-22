@@ -46,8 +46,8 @@ void play_frame_sound_effects(MachineState* machine_state) {
 	bool previous_active_effects[NUMBER_OF_SOUND_EFFECTS];
 	memcpy(previous_active_effects, machine_state->previous_active_sound_effects, sizeof(machine_state->previous_active_sound_effects));
 
-	fill_sound_effects(&machine_state->previous_active_sound_effects, machine_state->mwState->ports);
-	bool* current_sound_effects = machine_state->previous_active_sound_effects;
+	fill_sound_effects(machine_state->previous_active_sound_effects, machine_state->mwState->ports);
+	const bool* current_sound_effects = machine_state->previous_active_sound_effects;
 
 	bool sound_effects_to_play[NUMBER_OF_SOUND_EFFECTS] = { false }; // We fill only the ones that were added in this frame
 	determine_effects_to_play(sound_effects_to_play, current_sound_effects, previous_active_effects);
