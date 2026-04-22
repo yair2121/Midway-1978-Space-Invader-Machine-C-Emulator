@@ -1,4 +1,3 @@
-#include <inttypes.h>
 #include <stdio.h>
 #include "Disassembler8080.h"
 
@@ -300,6 +299,7 @@ int disassemble_8080_op(unsigned char* code_buffer, int pc)
 	case 0xfc: printf("NOP"); break;
 	case 0xfd: printf("CPI    #$%02x", code[1]); op_bytes = 2; break;
 	case 0xfe: printf("RST   7"); break;
+		default: ;
 	}
 	printf("\n");
 	return op_bytes;
