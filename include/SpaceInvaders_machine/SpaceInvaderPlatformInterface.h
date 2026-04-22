@@ -3,7 +3,6 @@
 #include "MWDisplay.h"
 #include "MWSound.h"
 #include "MWInput.h"
-#include "SpaceInvaderMachine.h"
 
 #include "EmulateMWSpaceInvaders.h"
 
