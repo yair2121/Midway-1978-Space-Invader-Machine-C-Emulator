@@ -32,5 +32,3 @@ Playable - ongoing refinements and improvements.
 ---
 
 *ROM and audio files not included due to copyright restrictions.*
-
-*WIP: still needs to create CMake for it*
