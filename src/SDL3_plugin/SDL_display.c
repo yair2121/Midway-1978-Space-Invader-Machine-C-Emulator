@@ -18,12 +18,12 @@ static uint32_t color_to_rgba(COLOR_FILTER color) {
 
 bool init_renderer_sdl(DisplayParams_SDL* display_params) {
 	SDL_Log("Initializing SDL renderer\n");
-	if (SDL_Init(SDL_INIT_VIDEO) < 0) {
+	if (SDL_Init(SDL_INIT_VIDEO) == false) {
 		SDL_Log("SDL_Init errors\n");
 		return false;
 	}
 
-	SDL_PropertiesID props = SDL_CreateProperties();
+	const SDL_PropertiesID props = SDL_CreateProperties();
 	if (props == 0) {
 		SDL_Log("Unable to create properties\n");
 		return false;
@@ -132,7 +132,7 @@ static void frame_to_rgba(COLOR_FILTER frame[FRAME_HEIGHT][FRAME_WIDTH], uint32_
 	}
 }
 
-static clear_renderer(SDL_Renderer* renderer) {
+static void clear_renderer(SDL_Renderer* renderer) {
 	SDL_SetRenderDrawColor(renderer, SDL_COLORS[BLACK].r, SDL_COLORS[BLACK].g , SDL_COLORS[BLACK].b, SDL_COLORS[BLACK].a);
 	SDL_RenderClear(renderer);
 
@@ -154,7 +154,6 @@ void render_frame_SDL(COLOR_FILTER frame[FRAME_HEIGHT][FRAME_WIDTH], SDL_CONTEXT
 	int window_width, window_height;
 	SDL_GetWindowSize(display_params_sdl->window, &window_width, &window_height);
 
-	float current_window_aspect_ratio = (float)window_width / (float)window_height;
 	SDL_FRect dst = calculate_dst_rect(display_params_sdl->window, SPACE_INVADERS_ASPECT_RATIO);
 
 	SDL_RenderTexture(display_params_sdl->renderer, display_params_sdl->framebuffer_texture, NULL, &dst);
