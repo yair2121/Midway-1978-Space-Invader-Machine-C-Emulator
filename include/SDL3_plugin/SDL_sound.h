@@ -6,7 +6,7 @@ typedef struct SDL_CONTEXT SDL_CONTEXT;
 typedef struct SoundEffect_SDL {
 	SDL_AudioSpec spec; // Audio specification for the sound effect
 	uint8_t* audio_buffer;
-	uint32_t audio_length;
+	int audio_length;
 	SDL_AudioStream* stream;
 } SoundEffectParams_SDL;
 

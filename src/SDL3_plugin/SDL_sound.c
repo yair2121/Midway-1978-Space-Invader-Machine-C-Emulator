@@ -2,7 +2,7 @@
 
 #include "SDL_platform.h"
 
-bool is_playing_sound_effect(SoundEffectParams_SDL sound_effect_params) {
+bool is_playing_sound_effect(const SoundEffectParams_SDL sound_effect_params) {
 	return SDL_GetAudioStreamAvailable(sound_effect_params.stream) > 0;
 }
 
@@ -22,7 +22,7 @@ bool init_sound_effects_sdl(SoundEffects_SDL* sound_effects_sdl, const char soun
 		return false;
 	}
 
-	SDL_AudioDeviceID device = SDL_OpenAudioDevice(SDL_AUDIO_DEVICE_DEFAULT_PLAYBACK, NULL);
+	const SDL_AudioDeviceID device = SDL_OpenAudioDevice(SDL_AUDIO_DEVICE_DEFAULT_PLAYBACK, NULL);
 	if (device == 0) {
 		SDL_Log("Failed to open audio device\n");
 		return false;
@@ -30,26 +30,19 @@ bool init_sound_effects_sdl(SoundEffects_SDL* sound_effects_sdl, const char soun
 	sound_effects_sdl->device = device;
 
 	for (SOUND_EFFECT_INVADERS i = 0; i < NUMBER_OF_SOUND_EFFECTS; i++) {
-		int port_sound_effects_index = i;
-		if (i >= NUMBER_OF_SOUND_EFFECTS_PORT_3) {
-			port_sound_effects_index -= NUMBER_OF_SOUND_EFFECTS_PORT_3; // Adjust index for port 5 effects
-		}
-		else {
-			port_sound_effects_index = i; // Use the same index for port 3 effects
-		}
 		SoundEffectParams_SDL* sound_effect_params = &sound_effects_sdl->params[i];
-		if (!SDL_LoadWAV(sound_effect_paths[i], &sound_effect_params->spec, &sound_effect_params->audio_buffer, &sound_effect_params->audio_length)) {
+		if (!SDL_LoadWAV(sound_effect_paths[i], &sound_effect_params->spec, &sound_effect_params->audio_buffer, (Uint32*)&sound_effect_params->audio_length)) {
 			SDL_Log("Failed to load WAV\n");
 			return false;
 		}
 
 		sound_effect_params->stream = SDL_CreateAudioStream(&sound_effect_params->spec, NULL);
-		if (!sound_effect_params->stream) {
+		if (sound_effect_params->stream == 0) {
 			SDL_Log("Failed to create audio stream for sound %d\n", i);
 			return false;
 		}
 
-		if (SDL_BindAudioStream(device, sound_effect_params->stream) < 0) {
+		if (SDL_BindAudioStream(device, sound_effect_params->stream) == false) {
 			SDL_Log("Failed to bind audio stream for sound %d\n", i);
 			return false;
 		}
