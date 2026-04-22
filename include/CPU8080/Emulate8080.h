@@ -91,9 +91,9 @@ typedef struct Cpu8080
 uint8_t get_next_opcode(State8080 *state);
 
 /// <summary>
-
+/// Run the next opcode (Pointed by PC register) on the 8080 cpu instance.
 /// </summary>
-/// <param name="state"></param>
+/// <param name="cpu"></param>
 /// <returns></returns>
 int emulate_8080_op(Cpu8080 *cpu);
 
