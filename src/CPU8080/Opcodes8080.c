@@ -433,7 +433,7 @@ void handle_pchl(Cpu8080 *cpu, State8080 *state, uint8_t *opcode)
 	op_pchl(state);
 }
 
-static op_mvi(State8080 *state, GENERAL_REGISTER source_register, uint8_t target_value)
+static void op_mvi(State8080 *state, GENERAL_REGISTER source_register, uint8_t target_value)
 {
 	if (source_register == HL_GENERAL_REGISTER)
 	{
@@ -643,7 +643,7 @@ void handle_shld(Cpu8080 *cpu, State8080 *state, uint8_t *opcode)
 	state->pc += 2;
 }
 
-static op_lhld(State8080 *state, uint16_t address)
+static void op_lhld(State8080 *state, uint16_t address)
 {
 	state->general_register[L] = read_from_memory(state, address);
 	state->general_register[H] = read_from_memory(state, address + 1);
@@ -712,4 +712,4 @@ const OpcodeHandler handlers[] = {
 	{is_value_part_of_JMP, handle_jmp},
 
 };
-const handlers_size = sizeof(handlers) / sizeof(OpcodeHandler);
+const size_t handlers_size = sizeof(handlers) / sizeof(OpcodeHandler);

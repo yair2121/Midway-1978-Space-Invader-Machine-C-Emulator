@@ -1,6 +1,5 @@
 #pragma once
 
-#include <inttypes.h>
 #include <stdbool.h>
 
 #include "Emulate8080.h"
@@ -192,7 +191,7 @@ typedef struct {
 
 
 extern const OpcodeHandler handlers[];
-extern const int handlers_size;
+extern const size_t handlers_size;
 
 #define SINGLE_VALUE_SHOULD_HANDLE(VALUE) bool is_value_##VALUE(OPCODE opcode) { return opcode == VALUE;}
 #define RANGE_VALUE_SHOULD_HANDLE(MIN, MAX) bool is_between_##MIN##_##MAX(OPCODE opcode) { return opcode >= MIN && opcode <= MAX;}
