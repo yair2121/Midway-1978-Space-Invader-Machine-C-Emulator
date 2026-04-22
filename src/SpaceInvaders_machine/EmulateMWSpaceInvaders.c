@@ -1,3 +1,5 @@
+#include <stdio.h>
+#include <stdlib.h>
 #include "EmulateMWSpaceInvaders.h"
 
 MWState* init_mw_state(Cpu8080* cpu) {
@@ -7,8 +9,8 @@ MWState* init_mw_state(Cpu8080* cpu) {
 		return NULL;
 	}
 
-	InTask in_task = { machine_in, &mwState->ports };
-	OutTask out_task = { machine_out, &mwState->ports };
+	const InTask in_task = { (read_port_func *) machine_in, &mwState->ports };
+	const OutTask out_task = { (write_port_func*) machine_out, &mwState->ports };
 	cpu->in_task = in_task;
 	cpu->out_task = out_task;
 	return mwState;
