@@ -1,4 +1,6 @@
 
+#include <stdio.h>
+#include <string.h>
 #include "Emulate8080.h"
 #include "Opcodes8080.h"
 
@@ -67,6 +69,8 @@ void set_register_pair(State8080* state, SPECIAL_REGISTER register_pair, uint16_
 		state->general_register[H] = high;
 		state->general_register[L] = low;
 		break;
+	default:
+		break; // Will never reach here
 	}
 }
 
