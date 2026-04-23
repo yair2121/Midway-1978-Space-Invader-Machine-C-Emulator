@@ -31,7 +31,7 @@ int main(int argc, char* argv[]) {
 
 	char sound_effect_paths[NUMBER_OF_SOUND_EFFECTS][0x100];
 	for (int i = 0; i < NUMBER_OF_SOUND_EFFECTS; i++) {
-		snprintf(sound_effect_paths[i], sizeof(sound_effect_paths[i]), "%s%d.wav", sound_directory, i);
+		snprintf(sound_effect_paths[i], sizeof(sound_effect_paths[i]), "%s/%s", sound_directory, SOUND_EFFECT_NAMES[i]);
 	}
 	SDL_CONTEXT sdl_context;
 
