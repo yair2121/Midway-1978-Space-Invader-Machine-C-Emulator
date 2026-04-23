@@ -62,6 +62,7 @@ static COLOR_FILTER pixel_to_color_filter(uint8_t x, uint8_t y) {
 			return COLOR_REGIONS[i].color;
 		}
 	}
+	return BLACK;
 }
 
 void apply_color_filter(uint8_t frame[FRAME_HEIGHT][FRAME_WIDTH], COLOR_FILTER result_colored_frame[FRAME_HEIGHT][FRAME_WIDTH])
