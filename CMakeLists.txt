@@ -1,4 +1,5 @@
 cmake_minimum_required(VERSION 3.20)
+cmake_policy(SET CMP0135 NEW)
 project(Midway_1978_Space_Invader_Machine_C_Emulator)
 
 set(CMAKE_C_STANDARD 11)
@@ -46,3 +47,46 @@ add_executable(Midway_1978_Space_Invader_Machine_C_Emulator
         src/SpaceInvaders_machine/SpaceInvaderMachine.c)
 
 target_link_libraries(Midway_1978_Space_Invader_Machine_C_Emulator PRIVATE SDL3::SDL3)
+
+# --- Testing ---
+enable_testing()
+
+include(FetchContent)
+FetchContent_Declare(
+  googletest
+  URL https://github.com/google/googletest/archive/refs/heads/main.zip
+)
+# For Windows: prevent overriding the parent project's compiler/linker settings
+set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
+FetchContent_MakeAvailable(googletest)
+
+# Common sources for the emulator (excluding main_SDL.c which has main())
+set(EMULATOR_SOURCES
+        src/CPU8080/Disassembler8080.c
+        src/CPU8080/Emulate8080.c
+        src/CPU8080/Opcodes8080.c
+        src/SDL3_plugin/SDL_display.c
+        src/SDL3_plugin/SDL_input.c
+        src/SDL3_plugin/SDL_platform.c
+        src/SDL3_plugin/SDL_sound.c
+        src/SpaceInvaders_machine/EmulateMWSpaceInvaders.c
+        src/SpaceInvaders_machine/MWDisplay.c
+        src/SpaceInvaders_machine/MWInput.c
+        src/SpaceInvaders_machine/MWSound.c
+        src/SpaceInvaders_machine/SpaceInvaderMachine.c
+)
+
+add_executable(emulator_tests
+        ${EMULATOR_SOURCES}
+        tests/Emulate8080_test.cpp
+        tests/Opcodes8080_test.cpp
+)
+
+target_link_libraries(emulator_tests
+        PRIVATE
+        GTest::gtest_main
+        SDL3::SDL3
+)
+
+include(GoogleTest)
+gtest_discover_tests(emulator_tests)
