@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.20)
 cmake_policy(SET CMP0135 NEW)
-project(Midway_1978_Space_Invader_Machine_C_Emulator)
+project(space-invaders)
 
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_C_STANDARD_REQUIRED ON)
@@ -17,7 +17,7 @@ include_directories(include/CPU8080)
 include_directories(include/SDL3_plugin)
 include_directories(include/SpaceInvaders_machine)
 
-add_executable(Midway_1978_Space_Invader_Machine_C_Emulator
+add_executable(space-invaders
         include/CPU8080/Disassembler8080.h
         include/CPU8080/Emulate8080.h
         include/CPU8080/Opcodes8080.h
@@ -46,7 +46,7 @@ add_executable(Midway_1978_Space_Invader_Machine_C_Emulator
         src/SpaceInvaders_machine/MWSound.c
         src/SpaceInvaders_machine/SpaceInvaderMachine.c)
 
-target_link_libraries(Midway_1978_Space_Invader_Machine_C_Emulator PRIVATE SDL3::SDL3)
+target_link_libraries(space-invaders PRIVATE SDL3::SDL3)
 
 # --- Testing ---
 enable_testing()
