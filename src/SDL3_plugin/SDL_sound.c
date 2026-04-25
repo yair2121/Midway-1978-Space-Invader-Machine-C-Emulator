@@ -7,10 +7,13 @@ bool is_playing_sound_effect(const SoundEffectParams_SDL sound_effect_params) {
 }
 
 void play_sound_effect(SoundEffectParams_SDL sound_effect_params) {
+	if (sound_effect_params.stream == NULL) {
+		return;
+	}
 	if (SDL_PutAudioStreamData(sound_effect_params.stream,
 		sound_effect_params.audio_buffer,
 		sound_effect_params.audio_length) == false) {
-		SDL_Log("Failed to queue audio data for sound %d: %s\n", 0, SDL_GetError());
+		SDL_Log("Failed to queue audio data: %s\n", SDL_GetError());
 	}
 }
 
@@ -18,33 +21,37 @@ void play_sound_effect(SoundEffectParams_SDL sound_effect_params) {
 bool init_sound_effects_sdl(SoundEffects_SDL* sound_effects_sdl, const char sound_effect_paths[NUMBER_OF_SOUND_EFFECTS][0x100]) {
 	SDL_Log("Initializing SoundEffects_SDL\n");
 	if (SDL_Init(SDL_INIT_AUDIO) == false) {
-		SDL_Log("SDL_Init errors");
+		SDL_Log("SDL_Init errors: %s", SDL_GetError());
 		return false;
 	}
 
 	const SDL_AudioDeviceID device = SDL_OpenAudioDevice(SDL_AUDIO_DEVICE_DEFAULT_PLAYBACK, NULL);
 	if (device == 0) {
-		SDL_Log("Failed to open audio device\n");
+		SDL_Log("Failed to open audio device: %s\n", SDL_GetError());
 		return false;
 	}
 	sound_effects_sdl->device = device;
 
 	for (SOUND_EFFECT_INVADERS i = 0; i < NUMBER_OF_SOUND_EFFECTS; i++) {
 		SoundEffectParams_SDL* sound_effect_params = &sound_effects_sdl->params[i];
+		// Reset stream and buffer to NULL to ensure clean state for missing files
+		sound_effect_params->stream = NULL;
+		sound_effect_params->audio_buffer = NULL;
+
 		if (!SDL_LoadWAV(sound_effect_paths[i], &sound_effect_params->spec, &sound_effect_params->audio_buffer, (Uint32*)&sound_effect_params->audio_length)) {
-			SDL_Log("Failed to load WAV\n");
-			return false;
+			SDL_Log("Warning: Failed to load sound effect '%s'. Skipping.\n", sound_effect_paths[i]);
+			continue;
 		}
 
 		sound_effect_params->stream = SDL_CreateAudioStream(&sound_effect_params->spec, NULL);
 		if (sound_effect_params->stream == 0) {
-			SDL_Log("Failed to create audio stream for sound %d\n", i);
-			return false;
+			SDL_Log("Failed to create audio stream for sound %d: %s\n", i, SDL_GetError());
+			continue;
 		}
 
 		if (SDL_BindAudioStream(device, sound_effect_params->stream) == false) {
-			SDL_Log("Failed to bind audio stream for sound %d\n", i);
-			return false;
+			SDL_Log("Failed to bind audio stream for sound %d: %s\n", i, SDL_GetError());
+			continue;
 		}
 	}
 	return true;

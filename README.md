@@ -16,19 +16,45 @@ The emulator consists of two main components:
 - **Core Emulator**: Platform-agnostic emulation of the 8080 CPU and Space Invaders hardware
 - **SDL Implementation**: Complete implementation using SDL3 for graphics, input, and audio
 
-Custom implementations can be created by providing display, input, audio, and timing functions to the core emulator.
-
-## Status
-
-Playable - ongoing refinements and improvements.
+Custom platform integrations (e.g., Android, iOS) can be implemented by providing display, input, audio, and timing functions to the core emulator.
 
 ## Requirements
 
-- C compiler
-- SDL3 (for included implementation)
-- Space Invaders ROM file
-- Audio files
+- **C Compiler**: C11-compliant
+- **C++ Compiler**: C++14-compliant (required for the test suite)
+- **SDL3**
+  - *macOS*: `brew install sdl3`
+- **Space Invaders ROM**: 8KB ROM file
+- **Audio Files**: WAV files for sound effects (Optional)
 
 ---
+## Running the Emulator
 
-*ROM and audio files not included due to copyright restrictions.*
+> [!IMPORTANT]
+> **This project DOES NOT include any ROM or audio files due to copyright restrictions. You must provide your own legally obtained files.**
+
+To run the emulator, you need to provide the ROM path and a directory containing the sound effects.
+
+### 1. Game ROM
+The emulator requires a single merged binary of the Space Invaders ROM (8KB).
+
+### 2. Sound Effects
+Place the following `.wav` files in a directory (e.g., `sounds/`):
+
+| Filename | Sound Effect |
+| :--- | :--- |
+| `ufo.wav` | Persistent UFO sound |
+| `shot.wav` | Player shot |
+| `player_die.wav` | Player explosion |
+| `invader_die.wav` | Alien explosion |
+| `fleet_1.wav` - `fleet_4.wav` | Alien movement (Pitche 1-4) |
+| `ufo_hit.wav` | UFO explosion |
+
+**Note:** The emulator will run even if some sounds are missing (it will simply be silent for those effects).
+
+### 3. Execution Command
+
+```bash
+# Usage: <ROM_PATH> <SOUND_DIRECTORY>
+./space-invaders path/to/invaders.rom path/to/sounds/
+```
