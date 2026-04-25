@@ -209,10 +209,10 @@ extern const size_t handlers_size;
 /// <summary>
 /// This is the handler format for ADD, ADC, SUB, SBB, ANA, XRA, ORA, CMP opcodes.
 /// </summary>
-#define HANDLE_SINGLE_TARGET_OPCODES(OP_NAME, OP_METHOD, OP_START, OP_IMMIDIATE)                          \
+#define HANDLE_SINGLE_TARGET_OPCODES(OP_NAME, OP_METHOD, OP_START, OP_IMMEDIATE)                          \
     void handle_##OP_NAME(Cpu8080 *cpu, State8080 *state, uint8_t *opcode) {                              \
-        uint16_t value_to_##OP_NAME = get_single_target_value(state, opcode, OP_START, OP_IMMIDIATE);                 \
-		if(*opcode == OP_IMMIDIATE) state->pc++;																			\
+        uint16_t value_to_##OP_NAME = get_single_target_value(state, opcode, OP_START, OP_IMMEDIATE);                 \
+		if(*opcode == OP_IMMEDIATE) state->pc++;																			\
         OP_METHOD(state, value_to_##OP_NAME);              \
     }
 
